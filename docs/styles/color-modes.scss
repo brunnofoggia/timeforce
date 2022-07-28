@@ -1,0 +1,95 @@
+html {
+    color: black;
+}
+
+@media (prefers-color-scheme: dark) {
+    html:not(.light) {
+        color: white;
+
+        pre .hljs-keyword, pre .hljs-assignment, pre .hljs-literal, pre .hljs-css .hljs-rule .hljs-keyword, pre .hljs-winutils, pre .hljs-javascript .hljs-title, pre .hljs-lisp .hljs-title, pre .hljs-subst {
+            color: orange;
+        }
+
+        body,
+        .container,
+        .page,
+        pre {
+            background: none;
+            background-color: #222 !important;
+        }
+
+        pre {
+            border: 2px solid #CCC;
+        }
+
+        pre .hljs-params {
+            color: deepskyblue;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        code,
+        pre,
+        a, a:active, a:hover, a:visited {
+            color: white !important;
+        }
+
+        small.color-modes {
+            a {
+                &:link, &:active, &:visited {
+                    border-color: white;
+                }
+            }
+        }
+    }
+}
+
+html.dark {
+    color: white;
+
+    pre .hljs-keyword, pre .hljs-assignment, pre .hljs-literal, pre .hljs-css .hljs-rule .hljs-keyword, pre .hljs-winutils, pre .hljs-javascript .hljs-title, pre .hljs-lisp .hljs-title, pre .hljs-subst {
+        color: orange;
+    }
+
+    body,
+    .container,
+    .page,
+    pre {
+        background: none;
+        background-color: #222 !important;
+    }
+
+    pre {
+        border: 2px solid #CCC;
+    }
+
+    pre .hljs-params {
+        color: deepskyblue;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    code,
+    pre,
+    a, a:active, a:hover, a:visited {
+        color: white !important;
+    }
+
+    small.color-modes {
+        a {
+            &:link, &:active, &:visited {
+                border-color: white;
+            }
+        }
+    }
+}

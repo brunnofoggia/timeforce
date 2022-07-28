@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html class="dark">
+
+<head>
+    <title>
+        collection.js
+    </title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" media="all" href="/public/stylesheets/normalize.css" />
+    <link rel="stylesheet" media="all" href="../docco.css" />
+    <link rel="stylesheet" media="all" href="../styles/color-modes.css" />
+    <link rel="stylesheet" media="all" href="../styles/design.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="page">
+
+            <div class="header">
+                <small class="color-modes">
+                    <a href="#" class="color-mode dark"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.add('dark'); document.getElementsByTagName('html')[0].classList.remove('light')">&nbsp;</a>
+                    &nbsp;&nbsp;&nbsp;
+                    <a href="#" class="color-mode light"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.remove('dark'); document.getElementsByTagName('html')[0].classList.add('light')">&nbsp;</a>
+                </small>
+                
+                                            <h1>
+                                                collection.js
+                                            </h1>
+                                            
+
+                                                
+                                                    <div class="toc">
+                                                        <h3>Table of Contents</h3>
+                                                        <ol>
+                                                            
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="collection.html">
+                                                                            src/collection.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="deep.html">
+                                                                            src/deep.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="events.html">
+                                                                            src/events.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="global.html">
+                                                                            src/global.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="helpers.html">
+                                                                            src/helpers.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="lodash.proxy.html">
+                                                                            src/lodash.proxy.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="main.html">
+                                                                            src/main.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="model.html">
+                                                                            src/model.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="sync.html">
+                                                                            src/sync.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                        </ol>
+                                                    </div>
+                                                    
+            </div>
+
+            
+                
+                    
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">import</span> _ <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lodash&#x27;</span>;
+<span class="hljs-keyword">import</span> timeforce <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./global.js&#x27;</span>;
+<span class="hljs-keyword">import</span> { slice, wrapError } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./helpers.js&#x27;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Events</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./events.js&#x27;</span>;</pre></div>
+                                
+                                    
+                
+                    <h2 id="timeforcecollection">timeforce.Collection</h2>
+
+                        
+                                    
+                
+                    <p>If models tend to represent a single row of data, a timeforce Collection is
+more analogous to a table full of data … or a small slice or page of that
+table, or a collection of rows that belong together for a particular reason
+– all of the messages in this particular folder, all of the documents
+belonging to this particular author, and so on. Collections maintain
+indexes of their models, both in order, and for lookup by <code>id</code>.</p>
+
+                        
+                                    
+                
+                    <p>Create a new <strong>Collection</strong>, perhaps to contain a specific type of <code>model</code>.
+If a <code>comparator</code> is specified, the Collection will maintain
+its models in sort order, as they’re added and removed.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> <span class="hljs-title class_">Collection</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">models, options</span>) {
+    options || (options = {});
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">preinitialize</span>.<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>);
+    _.<span class="hljs-title function_">each</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">preinitializePluginMethods</span>, <span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> <span class="hljs-variable language_">this</span>[name].<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>));
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">cid</span> = _.<span class="hljs-title function_">uniqueId</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">cidPrefix</span>);
+    <span class="hljs-keyword">if</span> (options.<span class="hljs-property">model</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-property">model</span> = options.<span class="hljs-property">model</span>;
+    <span class="hljs-keyword">if</span> (options.<span class="hljs-property">comparator</span> !== <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-property">comparator</span> = options.<span class="hljs-property">comparator</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_reset</span>();
+    _.<span class="hljs-title function_">each</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">initializePluginMethods</span>, <span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> <span class="hljs-variable language_">this</span>[name].<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>));
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">initialize</span>.<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>);
+    <span class="hljs-keyword">if</span> (models) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">reset</span>(models, _.<span class="hljs-title function_">extend</span>({ <span class="hljs-attr">silent</span>: <span class="hljs-literal">true</span> }, options));
+};</pre></div>
+                                
+                                    
+                
+                    <p>Default options for <code>Collection#set</code>.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> setOptions = { <span class="hljs-attr">add</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">remove</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">merge</span>: <span class="hljs-literal">true</span> };
+<span class="hljs-keyword">var</span> addOptions = { <span class="hljs-attr">add</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">remove</span>: <span class="hljs-literal">false</span> };</pre></div>
+                                
+                                    
+                
+                    <p>Splices <code>insert</code> into <code>array</code> at index <code>at</code>.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> splice = <span class="hljs-keyword">function</span> (<span class="hljs-params">array, insert, at</span>) {
+    at = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(at, <span class="hljs-number">0</span>), array.<span class="hljs-property">length</span>);
+    <span class="hljs-keyword">var</span> tail = <span class="hljs-title class_">Array</span>(array.<span class="hljs-property">length</span> - at);
+    <span class="hljs-keyword">var</span> length = insert.<span class="hljs-property">length</span>;
+    <span class="hljs-keyword">var</span> i;
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; tail.<span class="hljs-property">length</span>; i++) tail[i] = array[i + at];
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; length; i++) array[i + at] = insert[i];
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; tail.<span class="hljs-property">length</span>; i++) array[i + length + at] = tail[i];
+};</pre></div>
+                                
+                                    
+                
+                    <p>Define the Collection’s inheritable methods.</p>
+
+                        
+                            <div class='highlight'><pre>_.<span class="hljs-title function_">extend</span>(<span class="hljs-title class_">Collection</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>, <span class="hljs-title class_">Events</span>, {</pre></div>
+                                
+                                    
+                
+                    <p>global</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">_global</span>: timeforce,</pre></div>
+                                
+                                    
+                
+                    <p>The prefix is used to create the client id which is used to identify models locally.
+You may want to override this if you’re experiencing name clashes with model ids.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">cidPrefix</span>: <span class="hljs-string">&#x27;c&#x27;</span>,</pre></div>
+                                
+                                    
+                
+                    <p>preinitialize is an empty function by default. You can override it with a function
+or object.  preinitialize will run before any instantiation logic is run in the Collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">preinitialize</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) { },</pre></div>
+                                
+                                    
+                
+                    <p>preinitialize plugin methods is a list of method names that will run after preinitialize method is run in the Model.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">preinitializePluginMethods</span>: [],</pre></div>
+                                
+                                    
+                
+                    <p>initialize plugin methods is a list of method names that will run before the initialize method is run in the Model.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">initializePluginMethods</span>: [],</pre></div>
+                                
+                                    
+                
+                    <p>Initialize is an empty function by default. Override it with your own
+initialization logic.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">initialize</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) { },</pre></div>
+                                
+                                    
+                
+                    <p>The JSON representation of a Collection is an array of the
+models’ attributes.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">toJSON</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">options</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">map</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params">model</span>) { <span class="hljs-keyword">return</span> model.<span class="hljs-title function_">toJSON</span>(options); });
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Proxy <code>timeforce.sync</code> by default – but override this if you need
+custom syncing semantics for <em>this</em> particular model.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">sync</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_global</span>.<span class="hljs-property">sync</span>.<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Add a model, or list of models to the set. <code>models</code> may be timeforce
+Models or raw JavaScript objects to be converted to Models, or any
+combination of the two.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">add</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">models, options</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">set</span>(models, _.<span class="hljs-title function_">extend</span>({ <span class="hljs-attr">merge</span>: <span class="hljs-literal">false</span> }, options, addOptions));
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Remove a model, or a list of models from the set.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">remove</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">models, options</span>) {
+        options = _.<span class="hljs-title function_">extend</span>({}, options);
+        <span class="hljs-keyword">var</span> singular = !_.<span class="hljs-title function_">isArray</span>(models);
+        models = singular ? [models] : models.<span class="hljs-title function_">slice</span>();
+        <span class="hljs-keyword">var</span> removed = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_removeModels</span>(models, options);
+        <span class="hljs-keyword">if</span> (!options.<span class="hljs-property">silent</span> &amp;&amp; removed.<span class="hljs-property">length</span>) {
+            options.<span class="hljs-property">changes</span> = { <span class="hljs-attr">added</span>: [], <span class="hljs-attr">merged</span>: [], <span class="hljs-attr">removed</span>: removed };
+            <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;update&#x27;</span>, <span class="hljs-variable language_">this</span>, options);
+        }
+        <span class="hljs-keyword">return</span> singular ? removed[<span class="hljs-number">0</span>] : removed;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Update a collection by <code>set</code>-ing a new list of models, adding new ones,
+removing models that are no longer present, and merging models that
+already exist in the collection, as necessary. Similar to <strong>Model#set</strong>,
+the core operation for updating the data contained by the collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">set</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">models, options</span>) {
+        <span class="hljs-keyword">if</span> (models == <span class="hljs-literal">null</span>) <span class="hljs-keyword">return</span>;
+
+        options = _.<span class="hljs-title function_">extend</span>({}, setOptions, options);
+        <span class="hljs-keyword">if</span> (options.<span class="hljs-property">parse</span> &amp;&amp; !<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_isModel</span>(models)) {
+            models = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">parse</span>(models, options) || [];
+        }
+
+        <span class="hljs-keyword">var</span> singular = !_.<span class="hljs-title function_">isArray</span>(models);
+        models = singular ? [models] : models.<span class="hljs-title function_">slice</span>();
+
+        <span class="hljs-keyword">var</span> at = options.<span class="hljs-property">at</span>;
+        <span class="hljs-keyword">if</span> (at != <span class="hljs-literal">null</span>) at = +at;
+        <span class="hljs-keyword">if</span> (at &gt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span>) at = <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span>;
+        <span class="hljs-keyword">if</span> (at &lt; <span class="hljs-number">0</span>) at += <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span> + <span class="hljs-number">1</span>;
+
+        <span class="hljs-keyword">var</span> set = [];
+        <span class="hljs-keyword">var</span> toAdd = [];
+        <span class="hljs-keyword">var</span> toMerge = [];
+        <span class="hljs-keyword">var</span> toRemove = [];
+        <span class="hljs-keyword">var</span> modelMap = {};
+
+        <span class="hljs-keyword">var</span> add = options.<span class="hljs-property">add</span>;
+        <span class="hljs-keyword">var</span> merge = options.<span class="hljs-property">merge</span>;
+        <span class="hljs-keyword">var</span> remove = options.<span class="hljs-property">remove</span>;
+
+        <span class="hljs-keyword">var</span> sort = <span class="hljs-literal">false</span>;
+        <span class="hljs-keyword">var</span> sortable = <span class="hljs-variable language_">this</span>.<span class="hljs-property">comparator</span> &amp;&amp; at == <span class="hljs-literal">null</span> &amp;&amp; options.<span class="hljs-property">sort</span> !== <span class="hljs-literal">false</span>;
+        <span class="hljs-keyword">var</span> sortAttr = _.<span class="hljs-title function_">isString</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">comparator</span>) ? <span class="hljs-variable language_">this</span>.<span class="hljs-property">comparator</span> : <span class="hljs-literal">null</span>;</pre></div>
+                                
+                                    
+                
+                    <p>Turn bare objects into model references, and prevent invalid models
+from being added.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">var</span> model, i;
+        <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; models.<span class="hljs-property">length</span>; i++) {
+            model = models[i];</pre></div>
+                                
+                                    
+                
+                    <p>If a duplicate is found, prevent it from being added and
+optionally merge it into the existing model.</p>
+
+                        
+                            <div class='highlight'><pre>            <span class="hljs-keyword">var</span> existing = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">get</span>(model);
+            <span class="hljs-keyword">if</span> (existing) {
+                <span class="hljs-keyword">if</span> (merge &amp;&amp; model !== existing) {
+                    <span class="hljs-keyword">var</span> attrs = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_isModel</span>(model) ? model.<span class="hljs-property">attributes</span> : model;
+                    <span class="hljs-keyword">if</span> (options.<span class="hljs-property">parse</span>) attrs = existing.<span class="hljs-title function_">parse</span>(attrs, options);
+                    existing.<span class="hljs-title function_">set</span>(attrs, options);
+                    toMerge.<span class="hljs-title function_">push</span>(existing);
+                    <span class="hljs-keyword">if</span> (sortable &amp;&amp; !sort) sort = existing.<span class="hljs-title function_">hasChanged</span>(sortAttr);
+                }
+                <span class="hljs-keyword">if</span> (!modelMap[existing.<span class="hljs-property">cid</span>]) {
+                    modelMap[existing.<span class="hljs-property">cid</span>] = <span class="hljs-literal">true</span>;
+                    set.<span class="hljs-title function_">push</span>(existing);
+                }
+                models[i] = existing;</pre></div>
+                                
+                                    
+                
+                    <p>If this is a new, valid model, push it to the <code>toAdd</code> list.</p>
+
+                        
+                            <div class='highlight'><pre>            } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (add) {
+                model = models[i] = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_prepareModel</span>(model, options);
+                <span class="hljs-keyword">if</span> (model) {
+                    toAdd.<span class="hljs-title function_">push</span>(model);
+                    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_addReference</span>(model, options);
+                    modelMap[model.<span class="hljs-property">cid</span>] = <span class="hljs-literal">true</span>;
+                    set.<span class="hljs-title function_">push</span>(model);
+                }
+            }
+        }</pre></div>
+                                
+                                    
+                
+                    <p>Remove stale models.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (remove) {
+            <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span>; i++) {
+                model = <span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>[i];
+                <span class="hljs-keyword">if</span> (!modelMap[model.<span class="hljs-property">cid</span>]) toRemove.<span class="hljs-title function_">push</span>(model);
+            }
+            <span class="hljs-keyword">if</span> (toRemove.<span class="hljs-property">length</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_removeModels</span>(toRemove, options);
+        }</pre></div>
+                                
+                                    
+                
+                    <p>See if sorting is needed, update <code>length</code> and splice in new models.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">var</span> orderChanged = <span class="hljs-literal">false</span>;
+        <span class="hljs-keyword">var</span> replace = !sortable &amp;&amp; add &amp;&amp; remove;
+        <span class="hljs-keyword">if</span> (set.<span class="hljs-property">length</span> &amp;&amp; replace) {
+            orderChanged = <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span> !== set.<span class="hljs-property">length</span> || _.<span class="hljs-title function_">some</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">m, index</span>) {
+                <span class="hljs-keyword">return</span> m !== set[index];
+            });
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>.<span class="hljs-property">length</span> = <span class="hljs-number">0</span>;
+            <span class="hljs-title function_">splice</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>, set, <span class="hljs-number">0</span>);
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>.<span class="hljs-property">length</span>;
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (toAdd.<span class="hljs-property">length</span>) {
+            <span class="hljs-keyword">if</span> (sortable) sort = <span class="hljs-literal">true</span>;
+            <span class="hljs-title function_">splice</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>, toAdd, at == <span class="hljs-literal">null</span> ? <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span> : at);
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>.<span class="hljs-property">length</span>;
+        }</pre></div>
+                                
+                                    
+                
+                    <p>Silently sort the collection if appropriate.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (sort) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">sort</span>({ <span class="hljs-attr">silent</span>: <span class="hljs-literal">true</span> });</pre></div>
+                                
+                                    
+                
+                    <p>Unless silenced, it’s time to fire all appropriate add/sort/update events.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (!options.<span class="hljs-property">silent</span>) {
+            <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; toAdd.<span class="hljs-property">length</span>; i++) {
+                <span class="hljs-keyword">if</span> (at != <span class="hljs-literal">null</span>) options.<span class="hljs-property">index</span> = at + i;
+                model = toAdd[i];
+                model.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;add&#x27;</span>, model, <span class="hljs-variable language_">this</span>, options);
+            }
+            <span class="hljs-keyword">if</span> (sort || orderChanged) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;sort&#x27;</span>, <span class="hljs-variable language_">this</span>, options);
+            <span class="hljs-keyword">if</span> (toAdd.<span class="hljs-property">length</span> || toRemove.<span class="hljs-property">length</span> || toMerge.<span class="hljs-property">length</span>) {
+                options.<span class="hljs-property">changes</span> = {
+                    <span class="hljs-attr">added</span>: toAdd,
+                    <span class="hljs-attr">removed</span>: toRemove,
+                    <span class="hljs-attr">merged</span>: toMerge
+                };
+                <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;update&#x27;</span>, <span class="hljs-variable language_">this</span>, options);
+            }
+        }</pre></div>
+                                
+                                    
+                
+                    <p>Return the added (or merged) model (or models).</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">return</span> singular ? models[<span class="hljs-number">0</span>] : models;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>When you have more items than you want to add or remove individually,
+you can reset the entire set with a new list of models, without firing
+any granular <code>add</code> or <code>remove</code> events. Fires <code>reset</code> when finished.
+Useful for bulk operations and optimizations.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">reset</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">models, options</span>) {
+        options = options ? _.<span class="hljs-title function_">clone</span>(options) : {};
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>.<span class="hljs-property">length</span>; i++) {
+            <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_removeReference</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>[i], options);
+        }
+        options.<span class="hljs-property">previousModels</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_reset</span>();
+        models = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">add</span>(models, _.<span class="hljs-title function_">extend</span>({ <span class="hljs-attr">silent</span>: <span class="hljs-literal">true</span> }, options));
+        <span class="hljs-keyword">if</span> (!options.<span class="hljs-property">silent</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;reset&#x27;</span>, <span class="hljs-variable language_">this</span>, options);
+        <span class="hljs-keyword">return</span> models;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Add a model to the end of the collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">push</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">model, options</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">add</span>(model, _.<span class="hljs-title function_">extend</span>({ <span class="hljs-attr">at</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span> }, options));
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Remove a model from the end of the collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">pop</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">options</span>) {
+        <span class="hljs-keyword">var</span> model = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">at</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">remove</span>(model, options);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Add a model to the beginning of the collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">unshift</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">model, options</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">add</span>(model, _.<span class="hljs-title function_">extend</span>({ <span class="hljs-attr">at</span>: <span class="hljs-number">0</span> }, options));
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Remove a model from the beginning of the collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">shift</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">options</span>) {
+        <span class="hljs-keyword">var</span> model = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">at</span>(<span class="hljs-number">0</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">remove</span>(model, options);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Slice out a sub-array of models from the collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">slice</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> slice.<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>, <span class="hljs-variable language_">arguments</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Get a model from the set by id, cid, model object with id or cid
+properties, or an attributes object that is transformed through modelId.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">get</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">obj</span>) {
+        <span class="hljs-keyword">if</span> (obj == <span class="hljs-literal">null</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span>[obj] ||
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span>[<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">modelId</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_isModel</span>(obj) ? obj.<span class="hljs-property">attributes</span> : obj, obj.<span class="hljs-property">idAttribute</span>)] ||
+            obj.<span class="hljs-property">cid</span> &amp;&amp; <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span>[obj.<span class="hljs-property">cid</span>];
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Returns <code>true</code> if the model is in the collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">has</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">obj</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">get</span>(obj) != <span class="hljs-literal">null</span>;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Get the model at the given index.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">at</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">index</span>) {
+        <span class="hljs-keyword">if</span> (index &lt; <span class="hljs-number">0</span>) index += <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>[index];
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Return models with matching attributes. Useful for simple cases of
+<code>filter</code>.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">where</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attrs, first</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>[first ? <span class="hljs-string">&#x27;find&#x27;</span> : <span class="hljs-string">&#x27;filter&#x27;</span>](attrs);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Return the first model with matching attributes. Useful for simple cases
+of <code>find</code>.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">findWhere</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attrs</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">where</span>(attrs, <span class="hljs-literal">true</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Force the collection to re-sort itself. You don’t need to call this under
+normal circumstances, as the set will maintain sort order as each item
+is added.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">sort</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">options</span>) {
+        <span class="hljs-keyword">var</span> comparator = <span class="hljs-variable language_">this</span>.<span class="hljs-property">comparator</span>;
+        <span class="hljs-keyword">if</span> (!comparator) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Cannot sort a set without a comparator&#x27;</span>);
+        options || (options = {});
+
+        <span class="hljs-keyword">var</span> length = comparator.<span class="hljs-property">length</span>;
+        <span class="hljs-keyword">if</span> (_.<span class="hljs-title function_">isFunction</span>(comparator)) comparator = comparator.<span class="hljs-title function_">bind</span>(<span class="hljs-variable language_">this</span>);</pre></div>
+                                
+                                    
+                
+                    <p>Run sort based on type of <code>comparator</code>.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (length === <span class="hljs-number">1</span> || _.<span class="hljs-title function_">isString</span>(comparator)) {
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">sortBy</span>(comparator);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>.<span class="hljs-title function_">sort</span>(comparator);
+        }
+        <span class="hljs-keyword">if</span> (!options.<span class="hljs-property">silent</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;sort&#x27;</span>, <span class="hljs-variable language_">this</span>, options);
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Pluck an attribute from each model in the collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">pluck</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attr</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">map</span>(attr + <span class="hljs-string">&#x27;&#x27;</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Fetch the default set of models for this collection, resetting the
+collection when they arrive. If <code>reset: true</code> is passed, the response
+data will be passed through the <code>reset</code> method instead of <code>set</code>.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">fetch</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">options</span>) {
+        options = _.<span class="hljs-title function_">extend</span>({ <span class="hljs-attr">parse</span>: <span class="hljs-literal">true</span> }, options);
+        <span class="hljs-keyword">var</span> success = options.<span class="hljs-property">success</span>;
+        <span class="hljs-keyword">var</span> collection = <span class="hljs-variable language_">this</span>;
+        <span class="hljs-keyword">var</span> method = <span class="hljs-string">&#x27;read&#x27;</span>;
+        options.<span class="hljs-property">success</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) {
+            <span class="hljs-keyword">var</span> method = options.<span class="hljs-property">reset</span> ? <span class="hljs-string">&#x27;reset&#x27;</span> : <span class="hljs-string">&#x27;set&#x27;</span>;
+            collection[method](resp, options);
+            <span class="hljs-keyword">if</span> (success) success.<span class="hljs-title function_">call</span>(options.<span class="hljs-property">context</span>, collection, resp, options);
+            collection.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;fetch&#x27;</span>, collection, resp, options);
+            collection.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;sync&#x27;</span>, collection, resp, options);
+        };
+        <span class="hljs-title function_">wrapError</span>(<span class="hljs-variable language_">this</span>, options, <span class="hljs-string">&#x27;fetch&#x27;</span>);</pre></div>
+                                
+                                    
+                
+                    <p>makes possible to fetch lists with filters, pagination and more</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">form</span>) {
+            method = <span class="hljs-string">&#x27;create&#x27;</span>;
+            options.<span class="hljs-property">attrs</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">form</span>.<span class="hljs-title function_">toJSON</span>();
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">sync</span>(method, <span class="hljs-variable language_">this</span>, options);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Create a new instance of a model in this collection. Add the model to the
+collection immediately, unless <code>wait: true</code> is passed, in which case we
+wait for the server to agree.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">create</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">model, options</span>) {
+        options = options ? _.<span class="hljs-title function_">clone</span>(options) : {};
+        <span class="hljs-keyword">var</span> wait = options.<span class="hljs-property">wait</span>;
+        model = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_prepareModel</span>(model, options);
+        <span class="hljs-keyword">if</span> (!model) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        <span class="hljs-keyword">if</span> (!wait) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">add</span>(model, options);
+        <span class="hljs-keyword">var</span> collection = <span class="hljs-variable language_">this</span>;
+        <span class="hljs-keyword">var</span> success = options.<span class="hljs-property">success</span>;
+        options.<span class="hljs-property">success</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">m, resp, callbackOpts</span>) {
+            <span class="hljs-keyword">if</span> (wait) collection.<span class="hljs-title function_">add</span>(m, callbackOpts);
+            <span class="hljs-keyword">if</span> (success) success.<span class="hljs-title function_">call</span>(callbackOpts.<span class="hljs-property">context</span>, m, resp, callbackOpts);
+        };
+        model.<span class="hljs-title function_">save</span>(<span class="hljs-literal">null</span>, options);
+        <span class="hljs-keyword">return</span> model;
+    },</pre></div>
+                                
+                                    
+                
+                    <p><strong>parse</strong> converts a response into a list of models to be added to the
+collection. The default implementation is just to pass it through.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">parse</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) {
+        <span class="hljs-keyword">return</span> resp;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Create a new collection with an identical list of models as this one.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">clone</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-variable language_">this</span>.models, {
+            model: <span class="hljs-variable language_">this</span>.model,
+            comparator: <span class="hljs-variable language_">this</span>.comparator
+        }</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Define how to uniquely identify models in the collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">modelId</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attrs, idAttribute</span>) {
+        <span class="hljs-keyword">return</span> attrs[idAttribute || <span class="hljs-variable language_">this</span>.<span class="hljs-property">model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">idAttribute</span> || <span class="hljs-string">&#x27;id&#x27;</span>];
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Get an iterator of all models in this collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">values</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">CollectionIterator</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable constant_">ITERATOR_VALUES</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Get an iterator of all model IDs in this collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">keys</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">CollectionIterator</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable constant_">ITERATOR_KEYS</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Get an iterator of all [ID, model] tuples in this collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">entries</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">CollectionIterator</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable constant_">ITERATOR_KEYSVALUES</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Private method to reset all internal state. Called when the collection
+is first initialized or reset.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">_reset</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span> = <span class="hljs-number">0</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span> = [];
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span> = {};
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Prepare a hash of attributes (or other model) to be added to this
+collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">_prepareModel</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attrs, options</span>) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_isModel</span>(attrs)) {
+            <span class="hljs-keyword">if</span> (!attrs.<span class="hljs-property">collection</span>) attrs.<span class="hljs-property">collection</span> = <span class="hljs-variable language_">this</span>;
+            <span class="hljs-keyword">return</span> attrs;
+        }
+        options = options ? _.<span class="hljs-title function_">clone</span>(options) : {};
+        options.<span class="hljs-property">collection</span> = <span class="hljs-variable language_">this</span>;
+
+        <span class="hljs-keyword">var</span> model;
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>) {
+            model = <span class="hljs-keyword">new</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">model</span>(attrs, options);
+        } <span class="hljs-keyword">else</span> {</pre></div>
+                                
+                                    
+                
+                    <p>ES class methods didn’t have prototype</p>
+
+                        
+                            <div class='highlight'><pre>            model = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">model</span>(attrs, options);
+        }
+
+        <span class="hljs-keyword">if</span> (!model.<span class="hljs-property">validationError</span>) <span class="hljs-keyword">return</span> model;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;invalid&#x27;</span>, <span class="hljs-variable language_">this</span>, model.<span class="hljs-property">validationError</span>, options);
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Internal method called by both remove and set.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">_removeModels</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">models, options</span>) {
+        <span class="hljs-keyword">var</span> removed = [];
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; models.<span class="hljs-property">length</span>; i++) {
+            <span class="hljs-keyword">var</span> model = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">get</span>(models[i]);
+            <span class="hljs-keyword">if</span> (!model) <span class="hljs-keyword">continue</span>;
+
+            <span class="hljs-keyword">var</span> index = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">indexOf</span>(model);
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">models</span>.<span class="hljs-title function_">splice</span>(index, <span class="hljs-number">1</span>);
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span>--;</pre></div>
+                                
+                                    
+                
+                    <p>Remove references before triggering ‘remove’ event to prevent an
+infinite loop. #3693</p>
+
+                        
+                            <div class='highlight'><pre>            <span class="hljs-keyword">delete</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span>[model.<span class="hljs-property">cid</span>];
+            <span class="hljs-keyword">var</span> id = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">modelId</span>(model.<span class="hljs-property">attributes</span>, model.<span class="hljs-property">idAttribute</span>);
+            <span class="hljs-keyword">if</span> (id != <span class="hljs-literal">null</span>) <span class="hljs-keyword">delete</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span>[id];
+
+            <span class="hljs-keyword">if</span> (!options.<span class="hljs-property">silent</span>) {
+                options.<span class="hljs-property">index</span> = index;
+                model.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;remove&#x27;</span>, model, <span class="hljs-variable language_">this</span>, options);
+            }
+
+            removed.<span class="hljs-title function_">push</span>(model);
+            <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_removeReference</span>(model, options);
+        }
+        <span class="hljs-keyword">return</span> removed;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Method for checking whether an object should be considered a model for
+the purposes of adding to the collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">_isModel</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">model</span>) {
+        <span class="hljs-keyword">return</span> model <span class="hljs-keyword">instanceof</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_global</span>.<span class="hljs-property">Model</span>;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Internal method to create a model’s ties to a collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">_addReference</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">model</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span>[model.<span class="hljs-property">cid</span>] = model;
+        <span class="hljs-keyword">var</span> id = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">modelId</span>(model.<span class="hljs-property">attributes</span>, model.<span class="hljs-property">idAttribute</span>);
+        <span class="hljs-keyword">if</span> (id != <span class="hljs-literal">null</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span>[id] = model;
+        model.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;all&#x27;</span>, <span class="hljs-variable language_">this</span>.<span class="hljs-property">_onModelEvent</span>, <span class="hljs-variable language_">this</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Internal method to sever a model’s ties to a collection.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">_removeReference</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">model</span>) {
+        <span class="hljs-keyword">delete</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span>[model.<span class="hljs-property">cid</span>];
+        <span class="hljs-keyword">var</span> id = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">modelId</span>(model.<span class="hljs-property">attributes</span>, model.<span class="hljs-property">idAttribute</span>);
+        <span class="hljs-keyword">if</span> (id != <span class="hljs-literal">null</span>) <span class="hljs-keyword">delete</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span>[id];
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span> === model.<span class="hljs-property">collection</span>) <span class="hljs-keyword">delete</span> model.<span class="hljs-property">collection</span>;
+        model.<span class="hljs-title function_">off</span>(<span class="hljs-string">&#x27;all&#x27;</span>, <span class="hljs-variable language_">this</span>.<span class="hljs-property">_onModelEvent</span>, <span class="hljs-variable language_">this</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Internal method called every time a model in the set fires an event.
+Sets need to update their indexes when models change ids. All other
+events simply proxy through. “add” and “remove” events that originate
+in other collections are ignored.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">_onModelEvent</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">event, model, collection, options</span>) {
+        <span class="hljs-keyword">if</span> (model) {
+            <span class="hljs-keyword">if</span> ((event === <span class="hljs-string">&#x27;add&#x27;</span> || event === <span class="hljs-string">&#x27;remove&#x27;</span>) &amp;&amp; collection !== <span class="hljs-variable language_">this</span>) <span class="hljs-keyword">return</span>;
+            <span class="hljs-keyword">if</span> (event === <span class="hljs-string">&#x27;destroy&#x27;</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">remove</span>(model, options);
+            <span class="hljs-keyword">if</span> (event === <span class="hljs-string">&#x27;changeId&#x27;</span>) {
+                <span class="hljs-keyword">var</span> prevId = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">modelId</span>(model.<span class="hljs-title function_">previousAttributes</span>(), model.<span class="hljs-property">idAttribute</span>);
+                <span class="hljs-keyword">var</span> id = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">modelId</span>(model.<span class="hljs-property">attributes</span>, model.<span class="hljs-property">idAttribute</span>);
+                <span class="hljs-keyword">if</span> (prevId != <span class="hljs-literal">null</span>) <span class="hljs-keyword">delete</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span>[prevId];
+                <span class="hljs-keyword">if</span> (id != <span class="hljs-literal">null</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-property">_byId</span>[id] = model;
+            }
+        }
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">trigger</span>.<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Help to discover if a random object if a Model</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">isModel</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_global</span>.<span class="hljs-property">Model</span>;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Help to discover if a random object if a Collection</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">isCollection</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_global</span>.<span class="hljs-property">Collection</span>;
+    },
+
+});</pre></div>
+                                
+                                    
+                
+                    <p>Defining an @@iterator method implements JavaScript’s Iterable protocol.
+In modern ES2015 browsers, this value is found at Symbol.iterator.
+global Symbol</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> $$iterator = <span class="hljs-keyword">typeof</span> <span class="hljs-title class_">Symbol</span> === <span class="hljs-string">&#x27;function&#x27;</span> &amp;&amp; <span class="hljs-title class_">Symbol</span>.<span class="hljs-property">iterator</span>;
+<span class="hljs-keyword">if</span> ($$iterator) {
+    <span class="hljs-title class_">Collection</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>[$$iterator] = <span class="hljs-title class_">Collection</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">values</span>;
+}</pre></div>
+                                
+                                    
+                
+                    <h2 id="collectioniterator">CollectionIterator</h2>
+
+                        
+                                    
+                
+                    <p>A CollectionIterator implements JavaScript’s Iterator protocol, allowing the
+use of <code>for of</code> loops in modern browsers and interoperation between
+timeforce.Collection and other JavaScript functions and third-party libraries
+which can operate on Iterables.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> <span class="hljs-title class_">CollectionIterator</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">collection, kind</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">_collection</span> = collection;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">_kind</span> = kind;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">_index</span> = <span class="hljs-number">0</span>;
+};</pre></div>
+                                
+                                    
+                
+                    <p>This “enum” defines the three possible kinds of values which can be emitted
+by a CollectionIterator that correspond to the values(), keys() and entries()
+methods on Collection, respectively.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> <span class="hljs-variable constant_">ITERATOR_VALUES</span> = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">var</span> <span class="hljs-variable constant_">ITERATOR_KEYS</span> = <span class="hljs-number">2</span>;
+<span class="hljs-keyword">var</span> <span class="hljs-variable constant_">ITERATOR_KEYSVALUES</span> = <span class="hljs-number">3</span>;</pre></div>
+                                
+                                    
+                
+                    <p>All Iterators should themselves be Iterable.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">if</span> ($$iterator) {
+    <span class="hljs-title class_">CollectionIterator</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>[$$iterator] = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+    };
+}
+
+<span class="hljs-title class_">CollectionIterator</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">next</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">_collection</span>) {</pre></div>
+                                
+                                    
+                
+                    <p>Only continue iterating if the iterated collection is long enough.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">_index</span> &lt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">_collection</span>.<span class="hljs-property">length</span>) {
+            <span class="hljs-keyword">var</span> model = <span class="hljs-variable language_">this</span>.<span class="hljs-property">_collection</span>.<span class="hljs-title function_">at</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">_index</span>);
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">_index</span>++;</pre></div>
+                                
+                                    
+                
+                    <p>Construct a value depending on what kind of values should be iterated.</p>
+
+                        
+                            <div class='highlight'><pre>            <span class="hljs-keyword">var</span> value;
+            <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">_kind</span> === <span class="hljs-variable constant_">ITERATOR_VALUES</span>) {
+                value = model;
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">var</span> id = <span class="hljs-variable language_">this</span>.<span class="hljs-property">_collection</span>.<span class="hljs-title function_">modelId</span>(model.<span class="hljs-property">attributes</span>);
+                <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">_kind</span> === <span class="hljs-variable constant_">ITERATOR_KEYS</span>) {
+                    value = id;
+                } <span class="hljs-keyword">else</span> { <span class="hljs-comment">// ITERATOR_KEYSVALUES</span>
+                    value = [id, model];
+                }
+            }
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">value</span>: value, <span class="hljs-attr">done</span>: <span class="hljs-literal">false</span> };
+        }</pre></div>
+                                
+                                    
+                
+                    <p>Once exhausted, remove the reference to the collection so future
+calls to the next method always return done.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-variable language_">this</span>.<span class="hljs-property">_collection</span> = <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>;
+    }
+
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">value</span>: <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>, <span class="hljs-attr">done</span>: <span class="hljs-literal">true</span> };
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title class_">Collection</span>;</pre></div>
+                                
+                                    
+                                        <div class="fleur">h</div>
+        </div>
+    </div>
+</body>
+
+</html>

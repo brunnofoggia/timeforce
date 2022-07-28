@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html class="dark">
+
+<head>
+    <title>
+        events.js
+    </title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" media="all" href="/public/stylesheets/normalize.css" />
+    <link rel="stylesheet" media="all" href="../docco.css" />
+    <link rel="stylesheet" media="all" href="../styles/color-modes.css" />
+    <link rel="stylesheet" media="all" href="../styles/design.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="page">
+
+            <div class="header">
+                <small class="color-modes">
+                    <a href="#" class="color-mode dark"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.add('dark'); document.getElementsByTagName('html')[0].classList.remove('light')">&nbsp;</a>
+                    &nbsp;&nbsp;&nbsp;
+                    <a href="#" class="color-mode light"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.remove('dark'); document.getElementsByTagName('html')[0].classList.add('light')">&nbsp;</a>
+                </small>
+                
+                                            <h1>
+                                                events.js
+                                            </h1>
+                                            
+
+                                                
+                                                    <div class="toc">
+                                                        <h3>Table of Contents</h3>
+                                                        <ol>
+                                                            
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="collection.html">
+                                                                            src/collection.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="deep.html">
+                                                                            src/deep.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="events.html">
+                                                                            src/events.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="global.html">
+                                                                            src/global.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="helpers.html">
+                                                                            src/helpers.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="lodash.proxy.html">
+                                                                            src/lodash.proxy.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="main.html">
+                                                                            src/main.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="model.html">
+                                                                            src/model.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="sync.html">
+                                                                            src/sync.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                        </ol>
+                                                    </div>
+                                                    
+            </div>
+
+            
+                
+                    
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">import</span> _ <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lodash&#x27;</span>;</pre></div>
+                                
+                                    
+                
+                    <h2 id="timeforceevents">timeforce.Events</h2>
+
+                        
+                                    
+                
+                    <p>A module that can be mixed in to <em>any object</em> in order to provide it with
+a custom event channel. You may bind a callback to an event with <code>on</code> or
+remove with <code>off</code>; <code>trigger</code>-ing an event fires all callbacks in
+succession.</p>
+<pre><code><span class="hljs-keyword">var</span> object = {};
+_.<span class="hljs-title function_">extend</span>(object, timeforce.<span class="hljs-property">Events</span>);
+object.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;expand&#x27;</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>){ <span class="hljs-title function_">alert</span>(<span class="hljs-string">&#x27;expanded&#x27;</span>); });
+object.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;expand&#x27;</span>);
+</code></pre>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> <span class="hljs-title class_">Events</span> = {};</pre></div>
+                                
+                                    
+                
+                    <p>Regular expression used to split event strings.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> eventSplitter = <span class="hljs-regexp">/\s+/</span>;</pre></div>
+                                
+                                    
+                
+                    <p>A private global variable to share between listeners and listenees.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> _listening;</pre></div>
+                                
+                                    
+                
+                    <p>Iterates over the standard <code>event, callback</code> (as well as the fancy multiple
+space-separated events <code>&quot;change blur&quot;, callback</code> and jQuery-style event
+maps <code>{event: callback}</code>).</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> eventsApi = <span class="hljs-keyword">function</span> (<span class="hljs-params">iteratee, events, name, callback, opts</span>) {
+	<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, names;
+	<span class="hljs-keyword">if</span> (name &amp;&amp; <span class="hljs-keyword">typeof</span> name === <span class="hljs-string">&#x27;object&#x27;</span>) {</pre></div>
+                                
+                                    
+                
+                    <p>Handle event maps.</p>
+
+                        
+                            <div class='highlight'><pre>		<span class="hljs-keyword">if</span> (callback !== <span class="hljs-keyword">void</span> <span class="hljs-number">0</span> &amp;&amp; <span class="hljs-string">&#x27;context&#x27;</span> <span class="hljs-keyword">in</span> opts &amp;&amp; opts.<span class="hljs-property">context</span> === <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>) opts.<span class="hljs-property">context</span> = callback;
+		<span class="hljs-keyword">for</span> (names = _.<span class="hljs-title function_">keys</span>(name); i &lt; names.<span class="hljs-property">length</span>; i++) {
+			events = <span class="hljs-title function_">eventsApi</span>(iteratee, events, names[i], name[names[i]], opts);
+		}
+	} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (name &amp;&amp; eventSplitter.<span class="hljs-title function_">test</span>(name)) {</pre></div>
+                                
+                                    
+                
+                    <p>Handle space-separated event names by delegating them individually.</p>
+
+                        
+                            <div class='highlight'><pre>		<span class="hljs-keyword">for</span> (names = name.<span class="hljs-title function_">split</span>(eventSplitter); i &lt; names.<span class="hljs-property">length</span>; i++) {
+			events = <span class="hljs-title function_">iteratee</span>(events, names[i], callback, opts);
+		}
+	} <span class="hljs-keyword">else</span> {</pre></div>
+                                
+                                    
+                
+                    <p>Finally, standard events.</p>
+
+                        
+                            <div class='highlight'><pre>		events = <span class="hljs-title function_">iteratee</span>(events, name, callback, opts);
+	}
+	<span class="hljs-keyword">return</span> events;
+};</pre></div>
+                                
+                                    
+                
+                    <p>Bind an event to a <code>callback</code> function. Passing <code>&quot;all&quot;</code> will bind
+the callback to all events fired.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Events</span>.<span class="hljs-property">on</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">name, callback, context</span>) {
+	<span class="hljs-variable language_">this</span>.<span class="hljs-property">_events</span> = <span class="hljs-title function_">eventsApi</span>(onApi, <span class="hljs-variable language_">this</span>.<span class="hljs-property">_events</span> || {}, name, callback, {
+		<span class="hljs-attr">context</span>: context,
+		<span class="hljs-attr">ctx</span>: <span class="hljs-variable language_">this</span>,
+		<span class="hljs-attr">listening</span>: _listening
+	});
+
+	<span class="hljs-keyword">if</span> (_listening) {
+		<span class="hljs-keyword">var</span> listeners = <span class="hljs-variable language_">this</span>.<span class="hljs-property">_listeners</span> || (<span class="hljs-variable language_">this</span>.<span class="hljs-property">_listeners</span> = {});
+		listeners[_listening.<span class="hljs-property">id</span>] = _listening;</pre></div>
+                                
+                                    
+                
+                    <p>Allow the listening to use a counter, instead of tracking
+callbacks for library interop</p>
+
+                        
+                            <div class='highlight'><pre>		_listening.<span class="hljs-property">interop</span> = <span class="hljs-literal">false</span>;
+	}
+
+	<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+};</pre></div>
+                                
+                                    
+                
+                    <p>Inversion-of-control versions of <code>on</code>. Tell <em>this</em> object to listen to
+an event in another object… keeping track of what it’s listening to
+for easier unbinding later.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Events</span>.<span class="hljs-property">listenTo</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">obj, name, callback</span>) {
+	<span class="hljs-keyword">if</span> (!obj) <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+	<span class="hljs-keyword">var</span> id = obj.<span class="hljs-property">_listenId</span> || (obj.<span class="hljs-property">_listenId</span> = _.<span class="hljs-title function_">uniqueId</span>(<span class="hljs-string">&#x27;l&#x27;</span>));
+	<span class="hljs-keyword">var</span> listeningTo = <span class="hljs-variable language_">this</span>.<span class="hljs-property">_listeningTo</span> || (<span class="hljs-variable language_">this</span>.<span class="hljs-property">_listeningTo</span> = {});
+	<span class="hljs-keyword">var</span> listening = _listening = listeningTo[id];</pre></div>
+                                
+                                    
+                
+                    <p>This object is not listening to any other events on <code>obj</code> yet.
+Setup the necessary references to track the listening callbacks.</p>
+
+                        
+                            <div class='highlight'><pre>	<span class="hljs-keyword">if</span> (!listening) {
+		<span class="hljs-variable language_">this</span>.<span class="hljs-property">_listenId</span> || (<span class="hljs-variable language_">this</span>.<span class="hljs-property">_listenId</span> = _.<span class="hljs-title function_">uniqueId</span>(<span class="hljs-string">&#x27;l&#x27;</span>));
+		listening = _listening = listeningTo[id] = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Listening</span>(<span class="hljs-variable language_">this</span>, obj);
+	}</pre></div>
+                                
+                                    
+                
+                    <p>Bind callbacks on obj.</p>
+
+                        
+                            <div class='highlight'><pre>	<span class="hljs-keyword">var</span> error = <span class="hljs-title function_">tryCatchOn</span>(obj, name, callback, <span class="hljs-variable language_">this</span>);
+	_listening = <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>;
+
+	<span class="hljs-keyword">if</span> (error) <span class="hljs-keyword">throw</span> error;</pre></div>
+                                
+                                    
+                
+                    <p>If the target obj is not timeforce.Events, track events manually.</p>
+
+                        
+                            <div class='highlight'><pre>	<span class="hljs-keyword">if</span> (listening.<span class="hljs-property">interop</span>) listening.<span class="hljs-title function_">on</span>(name, callback);
+
+	<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+};</pre></div>
+                                
+                                    
+                
+                    <p>The reducing API that adds a callback to the <code>events</code> object.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> onApi = <span class="hljs-keyword">function</span> (<span class="hljs-params">events, name, callback, options</span>) {
+	<span class="hljs-keyword">if</span> (callback) {
+		<span class="hljs-keyword">var</span> handlers = events[name] || (events[name] = []);
+		<span class="hljs-keyword">var</span> context = options.<span class="hljs-property">context</span>, ctx = options.<span class="hljs-property">ctx</span>, listening = options.<span class="hljs-property">listening</span>;
+		<span class="hljs-keyword">if</span> (listening) listening.<span class="hljs-property">count</span>++;
+
+		handlers.<span class="hljs-title function_">push</span>({ <span class="hljs-attr">callback</span>: callback, <span class="hljs-attr">context</span>: context, <span class="hljs-attr">ctx</span>: context || ctx, <span class="hljs-attr">listening</span>: listening });
+	}
+	<span class="hljs-keyword">return</span> events;
+};</pre></div>
+                                
+                                    
+                
+                    <p>An try-catch guarded #on function, to prevent poisoning the global
+<code>_listening</code> variable.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> tryCatchOn = <span class="hljs-keyword">function</span> (<span class="hljs-params">obj, name, callback, context</span>) {
+	<span class="hljs-keyword">try</span> {
+		obj.<span class="hljs-title function_">on</span>(name, callback, context);
+	} <span class="hljs-keyword">catch</span> (e) {
+		<span class="hljs-keyword">return</span> e;
+	}
+};</pre></div>
+                                
+                                    
+                
+                    <p>Remove one or many callbacks. If <code>context</code> is null, removes all
+callbacks with that function. If <code>callback</code> is null, removes all
+callbacks for the event. If <code>name</code> is null, removes all bound
+callbacks for all events.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Events</span>.<span class="hljs-property">off</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">name, callback, context</span>) {
+	<span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">_events</span>) <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+	<span class="hljs-variable language_">this</span>.<span class="hljs-property">_events</span> = <span class="hljs-title function_">eventsApi</span>(offApi, <span class="hljs-variable language_">this</span>.<span class="hljs-property">_events</span>, name, callback, {
+		<span class="hljs-attr">context</span>: context,
+		<span class="hljs-attr">listeners</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">_listeners</span>
+	});
+
+	<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+};</pre></div>
+                                
+                                    
+                
+                    <p>Tell this object to stop listening to either specific events … or
+to every object it’s currently listening to.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Events</span>.<span class="hljs-property">stopListening</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">obj, name, callback</span>) {
+	<span class="hljs-keyword">var</span> listeningTo = <span class="hljs-variable language_">this</span>.<span class="hljs-property">_listeningTo</span>;
+	<span class="hljs-keyword">if</span> (!listeningTo) <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+
+	<span class="hljs-keyword">var</span> ids = obj ? [obj.<span class="hljs-property">_listenId</span>] : _.<span class="hljs-title function_">keys</span>(listeningTo);
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; ids.<span class="hljs-property">length</span>; i++) {
+		<span class="hljs-keyword">var</span> listening = listeningTo[ids[i]];</pre></div>
+                                
+                                    
+                
+                    <p>If listening doesn’t exist, this object is not currently
+listening to obj. Break out early.</p>
+
+                        
+                            <div class='highlight'><pre>		<span class="hljs-keyword">if</span> (!listening) <span class="hljs-keyword">break</span>;
+
+		listening.<span class="hljs-property">obj</span>.<span class="hljs-title function_">off</span>(name, callback, <span class="hljs-variable language_">this</span>);
+		<span class="hljs-keyword">if</span> (listening.<span class="hljs-property">interop</span>) listening.<span class="hljs-title function_">off</span>(name, callback);
+	}
+	<span class="hljs-keyword">if</span> (_.<span class="hljs-title function_">isEmpty</span>(listeningTo)) <span class="hljs-variable language_">this</span>.<span class="hljs-property">_listeningTo</span> = <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>;
+
+	<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+};</pre></div>
+                                
+                                    
+                
+                    <p>The reducing API that removes a callback from the <code>events</code> object.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> offApi = <span class="hljs-keyword">function</span> (<span class="hljs-params">events, name, callback, options</span>) {
+	<span class="hljs-keyword">if</span> (!events) <span class="hljs-keyword">return</span>;
+
+	<span class="hljs-keyword">var</span> context = options.<span class="hljs-property">context</span>, listeners = options.<span class="hljs-property">listeners</span>;
+	<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, names;</pre></div>
+                                
+                                    
+                
+                    <p>Delete all event listeners and “drop” events.</p>
+
+                        
+                            <div class='highlight'><pre>	<span class="hljs-keyword">if</span> (!name &amp;&amp; !context &amp;&amp; !callback) {
+		<span class="hljs-keyword">for</span> (names = _.<span class="hljs-title function_">keys</span>(listeners); i &lt; names.<span class="hljs-property">length</span>; i++) {
+			listeners[names[i]].<span class="hljs-title function_">cleanup</span>();
+		}
+		<span class="hljs-keyword">return</span>;
+	}
+
+	names = name ? [name] : _.<span class="hljs-title function_">keys</span>(events);
+	<span class="hljs-keyword">for</span> (; i &lt; names.<span class="hljs-property">length</span>; i++) {
+		name = names[i];
+		<span class="hljs-keyword">var</span> handlers = events[name];</pre></div>
+                                
+                                    
+                
+                    <p>Bail out if there are no events stored.</p>
+
+                        
+                            <div class='highlight'><pre>		<span class="hljs-keyword">if</span> (!handlers) <span class="hljs-keyword">break</span>;</pre></div>
+                                
+                                    
+                
+                    <p>Find any remaining events.</p>
+
+                        
+                            <div class='highlight'><pre>		<span class="hljs-keyword">var</span> remaining = [];
+		<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> j = <span class="hljs-number">0</span>; j &lt; handlers.<span class="hljs-property">length</span>; j++) {
+			<span class="hljs-keyword">var</span> handler = handlers[j];
+			<span class="hljs-keyword">if</span> (
+				callback &amp;&amp; callback !== handler.<span class="hljs-property">callback</span> &amp;&amp;
+				callback !== handler.<span class="hljs-property">callback</span>.<span class="hljs-property">_callback</span> ||
+				context &amp;&amp; context !== handler.<span class="hljs-property">context</span>
+			) {
+				remaining.<span class="hljs-title function_">push</span>(handler);
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-keyword">var</span> listening = handler.<span class="hljs-property">listening</span>;
+				<span class="hljs-keyword">if</span> (listening) listening.<span class="hljs-title function_">off</span>(name, callback);
+			}
+		}</pre></div>
+                                
+                                    
+                
+                    <p>Replace events if there are any remaining.  Otherwise, clean up.</p>
+
+                        
+                            <div class='highlight'><pre>		<span class="hljs-keyword">if</span> (remaining.<span class="hljs-property">length</span>) {
+			events[name] = remaining;
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-keyword">delete</span> events[name];
+		}
+	}
+
+	<span class="hljs-keyword">return</span> events;
+};</pre></div>
+                                
+                                    
+                
+                    <p>Bind an event to only be triggered a single time. After the first time
+the callback is invoked, its listener will be removed. If multiple events
+are passed in using the space-separated syntax, the handler will fire
+once for each event, not once for a combination of all events.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Events</span>.<span class="hljs-property">once</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">name, callback, context</span>) {</pre></div>
+                                
+                                    
+                
+                    <p>Map the event into a <code>{event: once}</code> object.</p>
+
+                        
+                            <div class='highlight'><pre>	<span class="hljs-keyword">var</span> events = <span class="hljs-title function_">eventsApi</span>(onceMap, {}, name, callback, <span class="hljs-variable language_">this</span>.<span class="hljs-property">off</span>.<span class="hljs-title function_">bind</span>(<span class="hljs-variable language_">this</span>));
+	<span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> name === <span class="hljs-string">&#x27;string&#x27;</span> &amp;&amp; context == <span class="hljs-literal">null</span>) callback = <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>;
+	<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">on</span>(events, callback, context);
+};</pre></div>
+                                
+                                    
+                
+                    <p>Inversion-of-control versions of <code>once</code>.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Events</span>.<span class="hljs-property">listenToOnce</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">obj, name, callback</span>) {</pre></div>
+                                
+                                    
+                
+                    <p>Map the event into a <code>{event: once}</code> object.</p>
+
+                        
+                            <div class='highlight'><pre>	<span class="hljs-keyword">var</span> events = <span class="hljs-title function_">eventsApi</span>(onceMap, {}, name, callback, <span class="hljs-variable language_">this</span>.<span class="hljs-property">stopListening</span>.<span class="hljs-title function_">bind</span>(<span class="hljs-variable language_">this</span>, obj));
+	<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">listenTo</span>(obj, events);
+};</pre></div>
+                                
+                                    
+                
+                    <p>Reduces the event callbacks into a map of <code>{event: onceWrapper}</code>.
+<code>offer</code> unbinds the <code>onceWrapper</code> after it has been called.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> onceMap = <span class="hljs-keyword">function</span> (<span class="hljs-params">map, name, callback, offer</span>) {
+	<span class="hljs-keyword">if</span> (callback) {
+		<span class="hljs-keyword">var</span> once = map[name] = _.<span class="hljs-title function_">once</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+			<span class="hljs-title function_">offer</span>(name, once);
+			callback.<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>);
+		});
+		once.<span class="hljs-property">_callback</span> = callback;
+	}
+	<span class="hljs-keyword">return</span> map;
+};</pre></div>
+                                
+                                    
+                
+                    <p>Trigger one or many events, firing all bound callbacks. Callbacks are
+passed the same arguments as <code>trigger</code> is, apart from the event name
+(unless you’re listening on <code>&quot;all&quot;</code>, which will cause your callback to
+receive the true name of the event as the first argument).</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Events</span>.<span class="hljs-property">trigger</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) {
+	<span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">_events</span>) <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+
+	<span class="hljs-keyword">var</span> length = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(<span class="hljs-number">0</span>, <span class="hljs-variable language_">arguments</span>.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>);
+	<span class="hljs-keyword">var</span> args = <span class="hljs-title class_">Array</span>(length);
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) args[i] = <span class="hljs-variable language_">arguments</span>[i + <span class="hljs-number">1</span>];
+
+	<span class="hljs-title function_">eventsApi</span>(triggerApi, <span class="hljs-variable language_">this</span>.<span class="hljs-property">_events</span>, name, <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>, args);
+	<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+};</pre></div>
+                                
+                                    
+                
+                    <p>Handles triggering the appropriate event callbacks.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> triggerApi = <span class="hljs-keyword">function</span> (<span class="hljs-params">objEvents, name, callback, args</span>) {
+	<span class="hljs-keyword">if</span> (objEvents) {
+		<span class="hljs-keyword">var</span> events = objEvents[name];
+		<span class="hljs-keyword">var</span> allEvents = objEvents.<span class="hljs-property">all</span>;
+		<span class="hljs-keyword">if</span> (events &amp;&amp; allEvents) allEvents = allEvents.<span class="hljs-title function_">slice</span>();
+		<span class="hljs-keyword">if</span> (events) <span class="hljs-title function_">triggerEvents</span>(events, args);
+		<span class="hljs-keyword">if</span> (allEvents) <span class="hljs-title function_">triggerEvents</span>(allEvents, [name].<span class="hljs-title function_">concat</span>(args));
+	}
+	<span class="hljs-keyword">return</span> objEvents;
+};</pre></div>
+                                
+                                    
+                
+                    <p>A difficult-to-believe, but optimized internal dispatch function for
+triggering events. Tries to keep the usual cases speedy (most internal
+timeforce events have 3 arguments).</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> triggerEvents = <span class="hljs-keyword">function</span> (<span class="hljs-params">events, args</span>) {
+	<span class="hljs-keyword">var</span> ev, i = -<span class="hljs-number">1</span>, l = events.<span class="hljs-property">length</span>;
+	<span class="hljs-keyword">while</span> (++i &lt; l) _.<span class="hljs-title function_">bind</span>((ev = events[i]).<span class="hljs-property">callback</span>, ev.<span class="hljs-property">ctx</span>)(...args);
+};</pre></div>
+                                
+                                    
+                
+                    <p>A listening class that tracks and cleans up memory bindings
+when all callbacks have been offed.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> <span class="hljs-title class_">Listening</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">listener, obj</span>) {
+	<span class="hljs-variable language_">this</span>.<span class="hljs-property">id</span> = listener.<span class="hljs-property">_listenId</span>;
+	<span class="hljs-variable language_">this</span>.<span class="hljs-property">listener</span> = listener;
+	<span class="hljs-variable language_">this</span>.<span class="hljs-property">obj</span> = obj;
+	<span class="hljs-variable language_">this</span>.<span class="hljs-property">interop</span> = <span class="hljs-literal">true</span>;
+	<span class="hljs-variable language_">this</span>.<span class="hljs-property">count</span> = <span class="hljs-number">0</span>;
+	<span class="hljs-variable language_">this</span>.<span class="hljs-property">_events</span> = <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>;
+};
+
+<span class="hljs-title class_">Listening</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">on</span> = <span class="hljs-title class_">Events</span>.<span class="hljs-property">on</span>;</pre></div>
+                                
+                                    
+                
+                    <p>Offs a callback (or several).
+Uses an optimized counter if the listenee uses timeforce.Events.
+Otherwise, falls back to manual tracking to support events
+library interop.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Listening</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">off</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">name, callback</span>) {
+	<span class="hljs-keyword">var</span> cleanup;
+	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">interop</span>) {
+		<span class="hljs-variable language_">this</span>.<span class="hljs-property">_events</span> = <span class="hljs-title function_">eventsApi</span>(offApi, <span class="hljs-variable language_">this</span>.<span class="hljs-property">_events</span>, name, callback, {
+			<span class="hljs-attr">context</span>: <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>,
+			<span class="hljs-attr">listeners</span>: <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>
+		});
+		cleanup = !<span class="hljs-variable language_">this</span>.<span class="hljs-property">_events</span>;
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-variable language_">this</span>.<span class="hljs-property">count</span>--;
+		cleanup = <span class="hljs-variable language_">this</span>.<span class="hljs-property">count</span> === <span class="hljs-number">0</span>;
+	}
+	<span class="hljs-keyword">if</span> (cleanup) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">cleanup</span>();
+};</pre></div>
+                                
+                                    
+                
+                    <p>Cleans up memory bindings between the listener and the listenee.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Listening</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">cleanup</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+	<span class="hljs-keyword">delete</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">listener</span>.<span class="hljs-property">_listeningTo</span>[<span class="hljs-variable language_">this</span>.<span class="hljs-property">obj</span>.<span class="hljs-property">_listenId</span>];
+	<span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">interop</span>) <span class="hljs-keyword">delete</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">obj</span>.<span class="hljs-property">_listeners</span>[<span class="hljs-variable language_">this</span>.<span class="hljs-property">id</span>];
+};</pre></div>
+                                
+                                    
+                
+                    <p>Aliases for backwards compatibility.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Events</span>.<span class="hljs-property">bind</span> = <span class="hljs-title class_">Events</span>.<span class="hljs-property">on</span>;
+<span class="hljs-title class_">Events</span>.<span class="hljs-property">unbind</span> = <span class="hljs-title class_">Events</span>.<span class="hljs-property">off</span>;
+
+<span class="hljs-keyword">export</span> {
+	<span class="hljs-title class_">Events</span>,
+	<span class="hljs-title class_">Listening</span>,
+	eventsApi,
+	onApi,
+	tryCatchOn,
+	offApi,
+	onceMap,
+	triggerApi,
+	triggerEvents
+};</pre></div>
+                                
+                                    
+                                        <div class="fleur">h</div>
+        </div>
+    </div>
+</body>
+
+</html>

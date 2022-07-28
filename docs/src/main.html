@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html class="dark">
+
+<head>
+    <title>
+        main.js
+    </title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" media="all" href="/public/stylesheets/normalize.css" />
+    <link rel="stylesheet" media="all" href="../docco.css" />
+    <link rel="stylesheet" media="all" href="../styles/color-modes.css" />
+    <link rel="stylesheet" media="all" href="../styles/design.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="page">
+
+            <div class="header">
+                <small class="color-modes">
+                    <a href="#" class="color-mode dark"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.add('dark'); document.getElementsByTagName('html')[0].classList.remove('light')">&nbsp;</a>
+                    &nbsp;&nbsp;&nbsp;
+                    <a href="#" class="color-mode light"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.remove('dark'); document.getElementsByTagName('html')[0].classList.add('light')">&nbsp;</a>
+                </small>
+                
+                                            <h1>
+                                                main.js
+                                            </h1>
+                                            
+
+                                                
+                                                    <div class="toc">
+                                                        <h3>Table of Contents</h3>
+                                                        <ol>
+                                                            
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="collection.html">
+                                                                            src/collection.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="deep.html">
+                                                                            src/deep.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="events.html">
+                                                                            src/events.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="global.html">
+                                                                            src/global.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="helpers.html">
+                                                                            src/helpers.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="lodash.proxy.html">
+                                                                            src/lodash.proxy.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="main.html">
+                                                                            src/main.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="model.html">
+                                                                            src/model.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="sync.html">
+                                                                            src/sync.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                        </ol>
+                                                    </div>
+                                                    
+            </div>
+
+            
+                
+                    
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">import</span> _ <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lodash&#x27;</span>;
+<span class="hljs-keyword">import</span> timeforce <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./global.js&#x27;</span>;
+<span class="hljs-keyword">import</span> { extend } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./helpers.js&#x27;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Events</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./events.js&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Deep</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./deep.js&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Model</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./model.js&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Collection</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./collection.js&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Sync</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./sync.js&#x27;</span>;
+<span class="hljs-keyword">import</span> { mix <span class="hljs-keyword">as</span> mixLodash } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./lodash.proxy.js&#x27;</span>;</pre></div>
+                                
+                                    
+                
+                    <h2 id="initial-setup">Initial Setup</h2>
+
+                        
+                                    
+                
+                    <p>global variable for extension</p>
+
+                        
+                            <div class='highlight'><pre>timeforce.<span class="hljs-property">_global</span> = timeforce;</pre></div>
+                                
+                                    
+                
+                    <p>Allow the <code>timeforce</code> object to serve as a global event bus, for folks who
+want global “pubsub” in a convenient place.</p>
+
+                        
+                            <div class='highlight'><pre>timeforce.<span class="hljs-property">Events</span> = <span class="hljs-title class_">Events</span>;
+_.<span class="hljs-title function_">extend</span>(timeforce, <span class="hljs-title class_">Events</span>);</pre></div>
+                                
+                                    
+                
+                    <p>Attach Deep to the <code>timeforce</code> object</p>
+
+                        
+                            <div class='highlight'><pre>timeforce.<span class="hljs-property">Deep</span> = <span class="hljs-title class_">Deep</span>;</pre></div>
+                                
+                                    
+                
+                    <h2 id="timeforcemodel">timeforce.Model</h2>
+
+                        
+                                    
+                
+                    <p>Attach Model to the <code>timeforce</code> object</p>
+
+                        
+                            <div class='highlight'><pre>timeforce.<span class="hljs-property">Model</span> = <span class="hljs-title class_">Model</span>;</pre></div>
+                                
+                                    
+                
+                    <h2 id="timeforcecollection">timeforce.Collection</h2>
+
+                        
+                                    
+                
+                    <p>The default model for a collection is just a <strong>timeforce.Model</strong>.
+This should be overridden in most cases.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Collection</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">model</span> = <span class="hljs-title class_">Model</span>;</pre></div>
+                                
+                                    
+                
+                    <p>Attach Collection to the <code>timeforce</code> object</p>
+
+                        
+                            <div class='highlight'><pre>timeforce.<span class="hljs-property">Collection</span> = <span class="hljs-title class_">Collection</span>;</pre></div>
+                                
+                                    
+                
+                    <h2 id="proxy-timeforce-class-methods-to-lodash-functions">Proxy timeforce class methods to Lodash functions</h2>
+
+                        
+                                    
+                
+                    <p>Mix in each Lodash method as a proxy to <code>Collection#models</code>.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title function_">mixLodash</span>(<span class="hljs-title class_">Collection</span>, <span class="hljs-title class_">Model</span>);</pre></div>
+                                
+                                    
+                
+                    <h2 id="timeforcesync">timeforce.Sync</h2>
+
+                        
+                                    
+                
+                    <p>Attach Sync functionalitty to the <code>timeforce</code> object</p>
+
+                        
+                            <div class='highlight'><pre>_.<span class="hljs-title function_">extend</span>(timeforce, <span class="hljs-title class_">Sync</span>);
+timeforce.<span class="hljs-property">sync</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> _.<span class="hljs-title function_">partial</span>(<span class="hljs-title class_">Sync</span>.<span class="hljs-property">sync</span>, <span class="hljs-variable language_">this</span>.<span class="hljs-property">_global</span>).<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>); };</pre></div>
+                                
+                                    
+                
+                    <p>Set up inheritance for the model, collection, router, view and history.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Model</span>.<span class="hljs-property">extend</span> = <span class="hljs-title class_">Collection</span>.<span class="hljs-property">extend</span> = extend;
+
+<span class="hljs-keyword">export</span> { extend, <span class="hljs-title class_">Events</span>, <span class="hljs-title class_">Deep</span>, timeforce };
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> timeforce;</pre></div>
+                                
+                                    
+                                        <div class="fleur">h</div>
+        </div>
+    </div>
+</body>
+
+</html>

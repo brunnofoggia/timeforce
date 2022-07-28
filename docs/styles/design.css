@@ -1,0 +1,100 @@
+pre, tt, code,
+.page pre {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  border: 2px solid #444;
+}
+
+.page pre {
+  background: #EDEDED;
+}
+
+code {
+  background-color: transparent;
+}
+
+ul > li > pre, ol > li > pre {
+  margin-left: -40px !important;
+}
+
+ul > li > ol > li > pre, ol > li > ul > li > pre {
+  margin-left: -80px !important;
+}
+
+small {
+  font-size: 0.7em;
+}
+small.color-modes {
+  display: block;
+  text-align: right;
+  margin-bottom: 1.2em;
+}
+small.color-modes a {
+  width: 25px;
+}
+small.color-modes a:link, small.color-modes a:active, small.color-modes a:hover, small.color-modes a:visited {
+  border-width: 2px;
+  border-style: solid;
+  border-color: black;
+  border-radius: 100px;
+  text-decoration: none;
+  display: inline-block;
+}
+small.color-modes a:link.light, small.color-modes a:active.light, small.color-modes a:hover.light, small.color-modes a:visited.light {
+  background-color: white;
+}
+small.color-modes a:link.dark, small.color-modes a:active.dark, small.color-modes a:hover.dark, small.color-modes a:visited.dark {
+  background-color: black;
+}
+small.color-modes a:hover {
+  border-color: gold !important;
+}
+
+pre + .highlight {
+  margin-top: 0.7em;
+}
+
+@media only screen and (max-width: 991px) {
+  body, .page {
+    font-size: 40px;
+  }
+
+  body > .container {
+    width: 100%;
+  }
+
+  body > .container > .page {
+    width: auto;
+    padding: 0px;
+  }
+
+  pre, tt,
+.page pre {
+    width: 95% !important;
+  }
+
+  pre, tt, code,
+.page pre {
+    font-size: 2rem;
+    line-height: 2.6rem;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    -moz-box-shadow: none;
+  }
+
+  .page p, ul li, ol li {
+    font-size: 1.1em;
+    line-height: 1.5em;
+  }
+
+  small.color-modes {
+    display: block;
+  }
+  small.color-modes a {
+    width: 55px;
+    line-height: 55px;
+  }
+}
+
+/*# sourceMappingURL=design.css.map */

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html class="dark">
+
+<head>
+    <title>
+        sync.js
+    </title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" media="all" href="/public/stylesheets/normalize.css" />
+    <link rel="stylesheet" media="all" href="../docco.css" />
+    <link rel="stylesheet" media="all" href="../styles/color-modes.css" />
+    <link rel="stylesheet" media="all" href="../styles/design.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="page">
+
+            <div class="header">
+                <small class="color-modes">
+                    <a href="#" class="color-mode dark"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.add('dark'); document.getElementsByTagName('html')[0].classList.remove('light')">&nbsp;</a>
+                    &nbsp;&nbsp;&nbsp;
+                    <a href="#" class="color-mode light"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.remove('dark'); document.getElementsByTagName('html')[0].classList.add('light')">&nbsp;</a>
+                </small>
+                
+                                            <h1>
+                                                sync.js
+                                            </h1>
+                                            
+
+                                                
+                                                    <div class="toc">
+                                                        <h3>Table of Contents</h3>
+                                                        <ol>
+                                                            
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="collection.html">
+                                                                            src/collection.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="deep.html">
+                                                                            src/deep.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="events.html">
+                                                                            src/events.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="global.html">
+                                                                            src/global.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="helpers.html">
+                                                                            src/helpers.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="lodash.proxy.html">
+                                                                            src/lodash.proxy.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="main.html">
+                                                                            src/main.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="model.html">
+                                                                            src/model.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="sync.html">
+                                                                            src/sync.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                        </ol>
+                                                    </div>
+                                                    
+            </div>
+
+            
+                
+                    
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">import</span> _ <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lodash&#x27;</span>;
+<span class="hljs-keyword">import</span> timeforce <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./global.js&#x27;</span>;
+<span class="hljs-keyword">import</span> { urlError } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./helpers.js&#x27;</span>;</pre></div>
+                                
+                                    
+                
+                    <h2 id="timeforcesync">timeforce.sync</h2>
+
+                        
+                                    
+                
+                    <p>Override this function to change the manner in which timeforce persists
+models data to, for example, the server. You will be passed the type of request, and the
+model in question. By default, makes a RESTful Ajax request
+to the model’s <code>url()</code>. Some possible customizations could be:</p>
+<ul>
+<li>Use <code>setTimeout</code> to batch rapid-fire updates into a single request.</li>
+<li>Send up the models as XML instead of JSON.</li>
+<li>Persist models via WebSockets instead of Ajax.</li>
+</ul>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> <span class="hljs-title class_">Sync</span> = {};</pre></div>
+                                
+                                    
+                
+                    <p>Turn on <code>emulateJSON</code> to support legacy servers that can’t deal with direct
+<code>application/json</code> requests … this will encode the body as
+<code>application/x-www-form-urlencoded</code> instead and will send the model in a
+form param named <code>model</code>.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Sync</span>.<span class="hljs-property">emulateJSON</span> = <span class="hljs-literal">false</span>;
+
+<span class="hljs-title class_">Sync</span>.<span class="hljs-property">sync</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">context, method, model, options, config</span>) {
+    <span class="hljs-keyword">var</span> type = methodMap[method];</pre></div>
+                                
+                                    
+                
+                    <p>Default options, unless specified.</p>
+
+                        
+                            <div class='highlight'><pre>    _.<span class="hljs-title function_">defaultsDeep</span>(options || (options = {}), {
+        <span class="hljs-attr">emulateJSON</span>: timeforce.<span class="hljs-property">emulateJSON</span>
+    });</pre></div>
+                                
+                                    
+                
+                    <p>Default options, unless specified.</p>
+
+                        
+                            <div class='highlight'><pre>    config = context.<span class="hljs-title function_">syncConfig</span>(config || {});</pre></div>
+                                
+                                    
+                
+                    <p>Default JSON-request options.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-keyword">var</span> params = { type, <span class="hljs-attr">method</span>: type.<span class="hljs-title function_">toLowerCase</span>(), <span class="hljs-attr">responseType</span>: <span class="hljs-string">&#x27;json&#x27;</span> };</pre></div>
+                                
+                                    
+                
+                    <p>Ensure that we have a URL.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (!options.<span class="hljs-property">url</span>) {
+        params.<span class="hljs-property">url</span> = _.<span class="hljs-title function_">result</span>(model, <span class="hljs-string">&#x27;url&#x27;</span>) || <span class="hljs-title function_">urlError</span>();
+    }</pre></div>
+                                
+                                    
+                
+                    <p>Ensure that we have the appropriate request data.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (options.<span class="hljs-property">data</span> == <span class="hljs-literal">null</span> &amp;&amp; model &amp;&amp; (method === <span class="hljs-string">&#x27;create&#x27;</span> || method === <span class="hljs-string">&#x27;update&#x27;</span> || method === <span class="hljs-string">&#x27;patch&#x27;</span>)) {
+        params.<span class="hljs-property">contentType</span> = <span class="hljs-string">&#x27;application/json&#x27;</span>;
+        params.<span class="hljs-property">data</span> = options.<span class="hljs-property">attrs</span> || model.<span class="hljs-title function_">toJSON</span>(options);
+    }</pre></div>
+                                
+                                    
+                
+                    <p>For older servers, emulate JSON by encoding the request into an HTML-form.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (options.<span class="hljs-property">emulateJSON</span>) {
+        params.<span class="hljs-property">contentType</span> = <span class="hljs-string">&#x27;application/x-www-form-urlencoded&#x27;</span>;
+        params.<span class="hljs-property">data</span> = params.<span class="hljs-property">data</span> ? { <span class="hljs-attr">model</span>: <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(params.<span class="hljs-property">data</span>) } : {};
+    }</pre></div>
+                                
+                                    
+                
+                    <p>Don’t process data on a non-GET request.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (params.<span class="hljs-property">type</span> !== <span class="hljs-string">&#x27;GET&#x27;</span> &amp;&amp; !options.<span class="hljs-property">emulateJSON</span>) {
+        params.<span class="hljs-property">processData</span> = <span class="hljs-literal">false</span>;
+    }</pre></div>
+                                
+                                    
+                
+                    <p>Pass along <code>textStatus</code> and <code>errorThrown</code> from jQuery.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-keyword">var</span> error = options.<span class="hljs-property">error</span>;
+    options.<span class="hljs-property">error</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">xhr, textStatus, errorThrown</span>) {
+        options.<span class="hljs-property">textStatus</span> = textStatus;
+        options.<span class="hljs-property">errorThrown</span> = errorThrown;
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> error === <span class="hljs-string">&#x27;function&#x27;</span>) {
+            _.<span class="hljs-title function_">bind</span>(error, options.<span class="hljs-property">context</span>)(xhr, textStatus, errorThrown);
+        }</pre></div>
+                                
+                                    
+                
+                    <p>error.call(options.context || null, xhr, textStatus, errorThrown);</p>
+
+                        
+                            <div class='highlight'><pre>    };</pre></div>
+                                
+                                    
+                
+                    <p>Make the request, allowing the user to override any Ajax options.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-keyword">var</span> xhr = options.<span class="hljs-property">xhr</span> = context.<span class="hljs-title function_">persist</span>(_.<span class="hljs-title function_">extend</span>(params, options), config);
+    model.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;request&#x27;</span>, model, xhr, _.<span class="hljs-title function_">extend</span>(params, options, { method }));
+    <span class="hljs-keyword">return</span> xhr;
+};</pre></div>
+                                
+                                    
+                
+                    <p>ABstraction that allows to integrate with other tools like axios</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Sync</span>.<span class="hljs-property">syncConfig</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">config</span>) {</pre></div>
+                                
+                                    
+                
+                    <p>Default options, unless specified.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-keyword">return</span> config;
+};</pre></div>
+                                
+                                    
+                
+                    <p>Map from CRUD to HTTP for our default <code>timeforce.sync</code> implementation.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> methodMap = {
+    <span class="hljs-attr">create</span>: <span class="hljs-string">&#x27;POST&#x27;</span>,
+    <span class="hljs-attr">update</span>: <span class="hljs-string">&#x27;PUT&#x27;</span>,
+    <span class="hljs-attr">patch</span>: <span class="hljs-string">&#x27;PATCH&#x27;</span>,
+    <span class="hljs-attr">delete</span>: <span class="hljs-string">&#x27;DELETE&#x27;</span>,
+    <span class="hljs-attr">read</span>: <span class="hljs-string">&#x27;GET&#x27;</span>
+};</pre></div>
+                                
+                                    
+                
+                    <p>Set the default implementation of <code>timeforce.persist</code> to proxy through to <code>$</code>.
+Override this if you’d like to use a different library.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-title class_">Sync</span>.<span class="hljs-property">persist</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">options</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> {
+        options.<span class="hljs-title function_">success</span>(options.<span class="hljs-property">data</span>);
+        <span class="hljs-title function_">resolve</span>(options.<span class="hljs-property">data</span>);
+    });
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title class_">Sync</span>;</pre></div>
+                                
+                                    
+                                        <div class="fleur">h</div>
+        </div>
+    </div>
+</body>
+
+</html>

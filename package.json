@@ -1,9 +1,9 @@
 {
     "name": "timeforce",
-    "description": "Model-Driven Design gives your JS: Models, Views, Collections, and Events.",
+    "description": "Model-Driven Design gives your JS: Models, Collections, and Events.",
     "url": "https://timeforce.99xp.org",
     "author": "Bruno Foggia",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "main": "dist/main.min.js",
     "type": "module",
     "license": "MIT",
@@ -14,16 +14,12 @@
     "keywords": [
         "model",
         "collection",
-        "view",
         "server",
         "client",
         "browser"
     ],
     "scripts": {
-        "test": "mocha && cypress run",
-        "cypress:open": "cypress open",
-        "mocha": "mocha",
-        "cypress": "cypress run",
+        "test": "mocha",
         "build": "npm run minify",
         "minify": "node ./terser.js",
         "doc": "docco src/*.js -l linear -l ../../../docs/template/",
@@ -33,7 +29,6 @@
         "lodash": "^4.17.21"
     },
     "devDependencies": {
-        "cypress": "^9.5.0",
         "docco": "^0.9.1",
         "eslint": "^8.9.0",
         "filesize": "^8.0.7",

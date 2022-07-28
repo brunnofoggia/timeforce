@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html class="dark">
+
+<head>
+    <title>
+        lodash.proxy.js
+    </title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" media="all" href="/public/stylesheets/normalize.css" />
+    <link rel="stylesheet" media="all" href="../docco.css" />
+    <link rel="stylesheet" media="all" href="../styles/color-modes.css" />
+    <link rel="stylesheet" media="all" href="../styles/design.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="page">
+
+            <div class="header">
+                <small class="color-modes">
+                    <a href="#" class="color-mode dark"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.add('dark'); document.getElementsByTagName('html')[0].classList.remove('light')">&nbsp;</a>
+                    &nbsp;&nbsp;&nbsp;
+                    <a href="#" class="color-mode light"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.remove('dark'); document.getElementsByTagName('html')[0].classList.add('light')">&nbsp;</a>
+                </small>
+                
+                                            <h1>
+                                                lodash.proxy.js
+                                            </h1>
+                                            
+
+                                                
+                                                    <div class="toc">
+                                                        <h3>Table of Contents</h3>
+                                                        <ol>
+                                                            
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="collection.html">
+                                                                            src/collection.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="deep.html">
+                                                                            src/deep.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="events.html">
+                                                                            src/events.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="global.html">
+                                                                            src/global.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="helpers.html">
+                                                                            src/helpers.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="lodash.proxy.html">
+                                                                            src/lodash.proxy.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="main.html">
+                                                                            src/main.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="model.html">
+                                                                            src/model.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="sync.html">
+                                                                            src/sync.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                        </ol>
+                                                    </div>
+                                                    
+            </div>
+
+            
+                
+                    
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">import</span> _ <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lodash&#x27;</span>;
+<span class="hljs-keyword">import</span> { slice } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./helpers.js&#x27;</span>;</pre></div>
+                                
+                                    
+                
+                    <p>Proxy timeforce class methods to Lodash functions, wrapping the model’s
+<code>attributes</code> object or collection’s <code>models</code> array behind the scenes.</p>
+<p>collection.filter(function(model) { return model.get(‘age’) &gt; 10 });
+collection.each(this.addView);</p>
+<p><code>Function#apply</code> can be slow so we use the method’s arg count, if we know it.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> addMethod = <span class="hljs-keyword">function</span> (<span class="hljs-params">base, length, method, attribute</span>) {
+	<span class="hljs-keyword">switch</span> (length) {
+		<span class="hljs-keyword">case</span> <span class="hljs-number">1</span>: <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+			<span class="hljs-keyword">return</span> base[method](<span class="hljs-variable language_">this</span>[attribute]);
+		};
+		<span class="hljs-keyword">case</span> <span class="hljs-number">2</span>: <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params">value</span>) {
+			<span class="hljs-keyword">return</span> base[method](<span class="hljs-variable language_">this</span>[attribute], value);
+		};
+		<span class="hljs-keyword">case</span> <span class="hljs-number">3</span>: <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params">iteratee, context</span>) {
+			<span class="hljs-keyword">return</span> base[method](<span class="hljs-variable language_">this</span>[attribute], <span class="hljs-title function_">cb</span>(iteratee, <span class="hljs-variable language_">this</span>), context);
+		};
+		<span class="hljs-keyword">case</span> <span class="hljs-number">4</span>: <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params">iteratee, defaultVal, context</span>) {
+			<span class="hljs-keyword">return</span> base[method](<span class="hljs-variable language_">this</span>[attribute], <span class="hljs-title function_">cb</span>(iteratee, <span class="hljs-variable language_">this</span>), defaultVal, context);
+		};
+		<span class="hljs-attr">default</span>: <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+			<span class="hljs-keyword">var</span> args = slice.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">arguments</span>);
+			args.<span class="hljs-title function_">unshift</span>(<span class="hljs-variable language_">this</span>[attribute]);
+			<span class="hljs-keyword">return</span> base[method].<span class="hljs-title function_">apply</span>(base, args);
+		};
+	}
+};
+
+<span class="hljs-keyword">var</span> addLodashMethods = <span class="hljs-keyword">function</span> (<span class="hljs-params">Class, base, methods, attribute</span>) {
+	_.<span class="hljs-title function_">each</span>(methods, <span class="hljs-keyword">function</span> (<span class="hljs-params">length, method</span>) {
+		<span class="hljs-keyword">if</span> (base[method]) <span class="hljs-title class_">Class</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>[method] = <span class="hljs-title function_">addMethod</span>(base, length, method, attribute);
+	});
+};</pre></div>
+                                
+                                    
+                
+                    <p>Support <code>collection.sortBy(&#39;attr&#39;)</code> and <code>collection.findWhere({id: 1})</code>.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> cb = <span class="hljs-keyword">function</span> (<span class="hljs-params">iteratee, instance</span>) {
+	<span class="hljs-keyword">if</span> (_.<span class="hljs-title function_">isFunction</span>(iteratee)) <span class="hljs-keyword">return</span> iteratee;
+	<span class="hljs-keyword">if</span> (_.<span class="hljs-title function_">isObject</span>(iteratee) &amp;&amp; !instance.<span class="hljs-title function_">_isModel</span>(iteratee)) <span class="hljs-keyword">return</span> <span class="hljs-title function_">modelMatcher</span>(iteratee);
+	<span class="hljs-keyword">if</span> (_.<span class="hljs-title function_">isString</span>(iteratee)) <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params">model</span>) { <span class="hljs-keyword">return</span> model.<span class="hljs-title function_">get</span>(iteratee); };
+	<span class="hljs-keyword">return</span> iteratee;
+};
+<span class="hljs-keyword">var</span> modelMatcher = <span class="hljs-keyword">function</span> (<span class="hljs-params">attrs</span>) {
+	<span class="hljs-keyword">var</span> matcher = _.<span class="hljs-title function_">matches</span>(attrs);
+	<span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params">model</span>) {
+		<span class="hljs-keyword">return</span> <span class="hljs-title function_">matcher</span>(model.<span class="hljs-property">attributes</span>);
+	};
+};</pre></div>
+                                
+                                    
+                
+                    <p>Lodash methods that we want to implement on the Collection.
+90% of the core usefulness of timeforce Collections is actually implemented
+right here:</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> collectionMethods = {
+	<span class="hljs-attr">forEach</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">each</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">map</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">collect</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">reduce</span>: <span class="hljs-number">0</span>,
+	<span class="hljs-attr">foldl</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">inject</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">reduceRight</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">foldr</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">find</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">detect</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">filter</span>: <span class="hljs-number">3</span>,
+	<span class="hljs-attr">select</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">reject</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">every</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">all</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">some</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">any</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">include</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">includes</span>: <span class="hljs-number">3</span>,
+	<span class="hljs-attr">contains</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">invoke</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">max</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">min</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">toArray</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">size</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">first</span>: <span class="hljs-number">3</span>,
+	<span class="hljs-attr">head</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">take</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">initial</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">takeRight</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">tail</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">drop</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">last</span>: <span class="hljs-number">3</span>,
+	<span class="hljs-attr">without</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">difference</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">indexOf</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">shuffle</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">lastIndexOf</span>: <span class="hljs-number">3</span>,
+	<span class="hljs-attr">isEmpty</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">chain</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">sample</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">partition</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">groupBy</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">countBy</span>: <span class="hljs-number">3</span>,
+	<span class="hljs-attr">sortBy</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">mapKeys</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">findIndex</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">findLastIndex</span>: <span class="hljs-number">3</span>
+};</pre></div>
+                                
+                                    
+                
+                    <p>Lodash methods that we want to implement on the Model, mapped to the
+number of arguments they take.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> modelMethods = {
+	<span class="hljs-attr">keys</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">values</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">toPairs</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">invert</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">pick</span>: <span class="hljs-number">0</span>,
+	<span class="hljs-attr">omit</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">chain</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">isEmpty</span>: <span class="hljs-number">1</span>
+};
+
+<span class="hljs-keyword">var</span> mix = <span class="hljs-keyword">function</span> (<span class="hljs-params">Collection, Model</span>) {</pre></div>
+                                
+                                    
+                
+                    <p>Mix in each Lodash method as a proxy to <code>Collection#models</code>.</p>
+
+                        
+                            <div class='highlight'><pre>	_.<span class="hljs-title function_">each</span>([
+		[<span class="hljs-title class_">Collection</span>, collectionMethods, <span class="hljs-string">&#x27;models&#x27;</span>],
+		[<span class="hljs-title class_">Model</span>, modelMethods, <span class="hljs-string">&#x27;attributes&#x27;</span>]
+	], <span class="hljs-keyword">function</span> (<span class="hljs-params">config</span>) {
+		<span class="hljs-keyword">var</span> <span class="hljs-title class_">Base</span> = config[<span class="hljs-number">0</span>],
+			methods = config[<span class="hljs-number">1</span>],
+			attribute = config[<span class="hljs-number">2</span>];
+
+		<span class="hljs-title class_">Base</span>.<span class="hljs-property">mixin</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">obj</span>) {
+			<span class="hljs-keyword">var</span> mappings = _.<span class="hljs-title function_">reduce</span>(_.<span class="hljs-title function_">functions</span>(obj), <span class="hljs-keyword">function</span> (<span class="hljs-params">memo, name</span>) {
+				memo[name] = <span class="hljs-number">0</span>;
+				<span class="hljs-keyword">return</span> memo;
+			}, {});
+			<span class="hljs-title function_">addLodashMethods</span>(<span class="hljs-title class_">Base</span>, obj, mappings, attribute);
+		};
+
+		<span class="hljs-title function_">addLodashMethods</span>(<span class="hljs-title class_">Base</span>, _, methods, attribute);
+	});
+};
+
+<span class="hljs-keyword">export</span> { addMethod, addLodashMethods, cb, modelMatcher, mix };</pre></div>
+                                
+                                    
+                                        <div class="fleur">h</div>
+        </div>
+    </div>
+</body>
+
+</html>

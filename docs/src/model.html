@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html class="dark">
+
+<head>
+    <title>
+        model.js
+    </title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" media="all" href="/public/stylesheets/normalize.css" />
+    <link rel="stylesheet" media="all" href="../docco.css" />
+    <link rel="stylesheet" media="all" href="../styles/color-modes.css" />
+    <link rel="stylesheet" media="all" href="../styles/design.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="page">
+
+            <div class="header">
+                <small class="color-modes">
+                    <a href="#" class="color-mode dark"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.add('dark'); document.getElementsByTagName('html')[0].classList.remove('light')">&nbsp;</a>
+                    &nbsp;&nbsp;&nbsp;
+                    <a href="#" class="color-mode light"
+                        onclick="event.preventDefault(); document.getElementsByTagName('html')[0].classList.remove('dark'); document.getElementsByTagName('html')[0].classList.add('light')">&nbsp;</a>
+                </small>
+                
+                                            <h1>
+                                                model.js
+                                            </h1>
+                                            
+
+                                                
+                                                    <div class="toc">
+                                                        <h3>Table of Contents</h3>
+                                                        <ol>
+                                                            
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="collection.html">
+                                                                            src/collection.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="deep.html">
+                                                                            src/deep.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="events.html">
+                                                                            src/events.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="global.html">
+                                                                            src/global.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="helpers.html">
+                                                                            src/helpers.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="lodash.proxy.html">
+                                                                            src/lodash.proxy.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="main.html">
+                                                                            src/main.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="model.html">
+                                                                            src/model.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                                
+                                                                    <li>
+                                                                        <a class="source"
+                                                                            href="sync.html">
+                                                                            src/sync.js
+                                                                        </a>
+                                                                    </li>
+                                                                    
+                                                        </ol>
+                                                    </div>
+                                                    
+            </div>
+
+            
+                
+                    
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">import</span> _ <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lodash&#x27;</span>;
+<span class="hljs-keyword">import</span> timeforce <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./global.js&#x27;</span>;
+<span class="hljs-keyword">import</span> { urlError, wrapError } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./helpers.js&#x27;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Events</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./events.js&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Deep</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./deep.js&#x27;</span>;</pre></div>
+                                
+                                    
+                
+                    <h2 id="timeforcemodel">timeforce.Model</h2>
+
+                        
+                                    
+                
+                    <p>timeforce <strong>Models</strong> are the basic data object in the framework –
+frequently representing a row in a table in a database on your server.
+A discrete chunk of data and a bunch of useful, related methods for
+performing computations and transformations on that data.</p>
+
+                        
+                                    
+                
+                    <p>Create a new model with the specified attributes. A client id (<code>cid</code>)
+is automatically generated and assigned for you.</p>
+
+                        
+                            <div class='highlight'><pre><span class="hljs-keyword">var</span> <span class="hljs-title class_">Model</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">attributes, options</span>) {
+    <span class="hljs-keyword">var</span> attrs = attributes || {};
+    options || (options = {});
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">preinitialize</span>.<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>);
+    _.<span class="hljs-title function_">each</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">preinitializePluginMethods</span>, <span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> <span class="hljs-variable language_">this</span>[name].<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>));
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">cid</span> = _.<span class="hljs-title function_">uniqueId</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">cidPrefix</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span> = {};
+    <span class="hljs-keyword">if</span> (options.<span class="hljs-property">collection</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-property">collection</span> = options.<span class="hljs-property">collection</span>;
+    <span class="hljs-keyword">if</span> (options.<span class="hljs-property">parse</span>) attrs = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">parse</span>(attrs, options) || {};
+    <span class="hljs-keyword">var</span> defaults = _.<span class="hljs-title function_">result</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-string">&#x27;defaults&#x27;</span>);
+    attrs = _.<span class="hljs-title function_">defaultsDeep</span>(_.<span class="hljs-title function_">extend</span>({}, defaults, attrs), defaults);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">set</span>(attrs, options);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">changed</span> = {};
+    _.<span class="hljs-title function_">each</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">initializePluginMethods</span>, <span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> <span class="hljs-variable language_">this</span>[name].<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>));
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">initialize</span>.<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>);
+};</pre></div>
+                                
+                                    
+                
+                    <p>Attach all inheritable methods to the Model prototype.</p>
+
+                        
+                            <div class='highlight'><pre>_.<span class="hljs-title function_">extend</span>(<span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>, <span class="hljs-title class_">Events</span>, {</pre></div>
+                                
+                                    
+                
+                    <p>global</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">_global</span>: timeforce,</pre></div>
+                                
+                                    
+                
+                    <p>A hash of attributes whose current and previous value differ.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">changed</span>: <span class="hljs-literal">null</span>,</pre></div>
+                                
+                                    
+                
+                    <p>The value returned during the last failed validation.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">validationError</span>: <span class="hljs-literal">null</span>,</pre></div>
+                                
+                                    
+                
+                    <p>The default name for the JSON <code>id</code> attribute is <code>&quot;id&quot;</code>. MongoDB and
+CouchDB users may want to set this to <code>&quot;_id&quot;</code>.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">idAttribute</span>: <span class="hljs-string">&#x27;id&#x27;</span>,</pre></div>
+                                
+                                    
+                
+                    <p>The prefix is used to create the client id which is used to identify models locally.
+You may want to override this if you’re experiencing name clashes with model ids.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">cidPrefix</span>: <span class="hljs-string">&#x27;m&#x27;</span>,</pre></div>
+                                
+                                    
+                
+                    <p>preinitialize is an empty function by default. You can override it with a function
+or object.  preinitialize will run before any instantiation logic is run in the Model.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">preinitialize</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) { },</pre></div>
+                                
+                                    
+                
+                    <p>preinitialize plugin methods is a list of method names that will run after preinitialize method is run in the Model.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">preinitializePluginMethods</span>: [],</pre></div>
+                                
+                                    
+                
+                    <p>initialize plugin methods is a list of method names that will run before the initialize method is run in the Model.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">initializePluginMethods</span>: [],</pre></div>
+                                
+                                    
+                
+                    <p>Initialize is an empty function by default. Override it with your own
+initialization logic.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">initialize</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) { },</pre></div>
+                                
+                                    
+                
+                    <p>Return a copy of the model’s <code>attributes</code> object.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">toJSON</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> _.<span class="hljs-title function_">cloneDeep</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Proxy <code>timeforce.sync</code> by default – but override this if you need
+custom syncing semantics for <em>this</em> particular model.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">sync</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_global</span>.<span class="hljs-property">sync</span>.<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Get the value of an attribute.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">get</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attr</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-title class_">Deep</span>.<span class="hljs-title function_">search</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span>, attr);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Get the HTML-escaped value of an attribute.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">escape</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attr</span>) {
+        <span class="hljs-keyword">return</span> _.<span class="hljs-built_in">escape</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">get</span>(attr));
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Returns <code>true</code> if the attribute contains a value that is not null
+or undefined.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">has</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attr</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">get</span>(attr) != <span class="hljs-literal">null</span>;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Special-cased proxy to Lodash’s <code>_.matches</code> method.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">matches</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attrs</span>) {
+        <span class="hljs-keyword">return</span> !!_.<span class="hljs-title function_">iteratee</span>(attrs, <span class="hljs-variable language_">this</span>)(<span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Set a hash of model attributes on the object, firing <code>&quot;change&quot;</code>. This is
+the core primitive operation of a model, updating the data and notifying
+anyone who needs to know about the change in state. The heart of the beast.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">set</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">key, val, options</span>) {
+        <span class="hljs-keyword">if</span> (key == <span class="hljs-literal">null</span>) <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;</pre></div>
+                                
+                                    
+                
+                    <p>Handle both <code>&quot;key&quot;, value</code> and <code>{key: value}</code> -style arguments.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">var</span> attrs;
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> key === <span class="hljs-string">&#x27;object&#x27;</span>) {
+            attrs = key;
+            options = val;
+        } <span class="hljs-keyword">else</span> {
+            (attrs = {})[key] = val;
+        }
+
+        options || (options = {});</pre></div>
+                                
+                                    
+                
+                    <p>Run validation.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_validate</span>(attrs, options)) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;</pre></div>
+                                
+                                    
+                
+                    <p>Extract attributes and options.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">var</span> silent = options.<span class="hljs-property">silent</span>;
+        <span class="hljs-keyword">var</span> changes = [];
+        <span class="hljs-keyword">var</span> changing = <span class="hljs-variable language_">this</span>.<span class="hljs-property">_changing</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">_changing</span> = <span class="hljs-literal">true</span>;
+
+        <span class="hljs-keyword">if</span> (!changing) {
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">_previousAttributes</span> = _.<span class="hljs-title function_">cloneDeep</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span>);
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">changed</span> = {};
+        }</pre></div>
+                                
+                                    
+                
+                    <p>var current = this.attributes;</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">var</span> changed = <span class="hljs-variable language_">this</span>.<span class="hljs-property">changed</span>;
+        <span class="hljs-keyword">var</span> prev = <span class="hljs-variable language_">this</span>.<span class="hljs-property">_previousAttributes</span>;
+
+        <span class="hljs-keyword">var</span> prevPlain = <span class="hljs-title class_">Deep</span>.<span class="hljs-title function_">join</span>(prev);
+        <span class="hljs-keyword">var</span> currentPlain = <span class="hljs-title class_">Deep</span>.<span class="hljs-title function_">join</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span>);
+        <span class="hljs-keyword">var</span> attrsPlain = <span class="hljs-title class_">Deep</span>.<span class="hljs-title function_">join</span>(attrs);</pre></div>
+                                
+                                    
+                
+                    <p>collect changes</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> attr <span class="hljs-keyword">in</span> attrsPlain) {
+            val = attrsPlain[attr];
+            <span class="hljs-keyword">if</span> (!_.<span class="hljs-title function_">isEqual</span>(currentPlain[attr], val)) changes.<span class="hljs-title function_">push</span>(<span class="hljs-title class_">Deep</span>.<span class="hljs-title function_">trail</span>(attr).<span class="hljs-title function_">reverse</span>());
+            <span class="hljs-keyword">if</span> (!_.<span class="hljs-title function_">isEqual</span>(prevPlain[attr], val)) {
+                changed[attr] = val;
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">delete</span> changed[attr];
+            }
+        }</pre></div>
+                                
+                                    
+                
+                    <p><code>set</code> attribute, update or delete the current attributes.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span> = <span class="hljs-title class_">Deep</span>.<span class="hljs-title function_">set</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span>, attrsPlain, _.<span class="hljs-title function_">pick</span>(options, <span class="hljs-string">&#x27;unset&#x27;</span>));
+
+        currentPlain = <span class="hljs-title class_">Deep</span>.<span class="hljs-title function_">join</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span>);</pre></div>
+                                
+                                    
+                
+                    <p>Update the <code>id</code>.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">idAttribute</span> <span class="hljs-keyword">in</span> attrsPlain) {
+            <span class="hljs-keyword">var</span> prevId = <span class="hljs-variable language_">this</span>.<span class="hljs-property">id</span>;
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">id</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">get</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">idAttribute</span>);
+            <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;changeId&#x27;</span>, <span class="hljs-variable language_">this</span>, prevId, options);
+        }</pre></div>
+                                
+                                    
+                
+                    <p>Trigger all relevant attribute changes.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (!silent) {
+            <span class="hljs-keyword">if</span> (changes.<span class="hljs-property">length</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-property">_pending</span> = options;</pre></div>
+                                
+                                    
+                
+                    <p>walk through attrs changes</p>
+
+                        
+                            <div class='highlight'><pre>            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; changes.<span class="hljs-property">length</span>; i++) {
+                <span class="hljs-keyword">let</span> change = changes[i];</pre></div>
+                                
+                                    
+                
+                    <p>walk through trail of changes</p>
+
+                        
+                            <div class='highlight'><pre>                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> j = <span class="hljs-number">0</span>; j &lt; change.<span class="hljs-property">length</span>; j++) {
+                    <span class="hljs-keyword">let</span> trail = change[j];
+                    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;change:&#x27;</span> + trail, <span class="hljs-variable language_">this</span>, currentPlain[change[<span class="hljs-number">0</span>]], options);
+                }
+            }
+        }</pre></div>
+                                
+                                    
+                
+                    <p>You might be wondering why there’s a <code>while</code> loop here. Changes can
+be recursively nested within <code>&quot;change&quot;</code> events.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (changing) <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+        <span class="hljs-keyword">if</span> (!silent) {
+            <span class="hljs-keyword">while</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">_pending</span>) {
+                options = <span class="hljs-variable language_">this</span>.<span class="hljs-property">_pending</span>;
+                <span class="hljs-variable language_">this</span>.<span class="hljs-property">_pending</span> = <span class="hljs-literal">false</span>;
+                <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;change&#x27;</span>, <span class="hljs-variable language_">this</span>, options);
+            }
+        }
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">_pending</span> = <span class="hljs-literal">false</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">_changing</span> = <span class="hljs-literal">false</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Remove an attribute from the model, firing <code>&quot;change&quot;</code>. <code>unset</code> is a noop
+if the attribute doesn’t exist.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">unset</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attr, options</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">set</span>(attr, <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>, _.<span class="hljs-title function_">extend</span>({}, options, { <span class="hljs-attr">unset</span>: <span class="hljs-literal">true</span> }));
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Clear all attributes on the model, firing <code>&quot;change&quot;</code>.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">clear</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">options</span>) {
+        <span class="hljs-keyword">var</span> attrs = {};
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span>) attrs[key] = <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">set</span>(attrs, _.<span class="hljs-title function_">extend</span>({}, options, { <span class="hljs-attr">unset</span>: <span class="hljs-literal">true</span> }));
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Determine if the model has changed since the last <code>&quot;change&quot;</code> event.
+If you specify an attribute name, determine if that attribute has changed.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">hasChanged</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attr</span>) {
+        <span class="hljs-keyword">if</span> (attr == <span class="hljs-literal">null</span>) <span class="hljs-keyword">return</span> !_.<span class="hljs-title function_">isEmpty</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">changed</span>);
+        <span class="hljs-keyword">return</span> _.<span class="hljs-title function_">has</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">changed</span>, attr);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Return an object containing all the attributes that have changed, or
+false if there are no changed attributes. Useful for determining what
+parts of a view need to be updated and/or what attributes need to be
+persisted to the server. Unset attributes will be set to undefined.
+You can also pass an attributes object to diff against the model,
+determining if there <em>would be</em> a change.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">changedAttributes</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">diff</span>) {
+        <span class="hljs-keyword">if</span> (!diff) <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">hasChanged</span>() ? _.<span class="hljs-title function_">cloneDeep</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">changed</span>) : <span class="hljs-literal">false</span>;
+        <span class="hljs-keyword">var</span> old = <span class="hljs-title class_">Deep</span>.<span class="hljs-title function_">join</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">_changing</span> ? <span class="hljs-variable language_">this</span>.<span class="hljs-property">_previousAttributes</span> : <span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span>);
+        <span class="hljs-keyword">var</span> changed = {};
+        <span class="hljs-keyword">var</span> hasChanged;
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> attr <span class="hljs-keyword">in</span> diff) {
+            <span class="hljs-keyword">var</span> val = diff[attr];
+            <span class="hljs-keyword">if</span> (_.<span class="hljs-title function_">isEqual</span>(old[attr], val)) <span class="hljs-keyword">continue</span>;
+            changed[attr] = val;
+            hasChanged = <span class="hljs-literal">true</span>;
+        }
+        <span class="hljs-keyword">return</span> hasChanged ? changed : <span class="hljs-literal">false</span>;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Get the previous value of an attribute, recorded at the time the last
+<code>&quot;change&quot;</code> event was fired.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">previous</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attr</span>) {
+        <span class="hljs-keyword">if</span> (attr == <span class="hljs-literal">null</span> || !<span class="hljs-variable language_">this</span>.<span class="hljs-property">_previousAttributes</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-title class_">Deep</span>.<span class="hljs-title function_">search</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">_previousAttributes</span>, attr);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Get all of the attributes of the model at the time of the previous
+<code>&quot;change&quot;</code> event.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">previousAttributes</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> _.<span class="hljs-title function_">cloneDeep</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">_previousAttributes</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Fetch the model from the server, merging the response with the model’s
+local attributes. Any changed attributes will trigger a “change” event.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">fetch</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">options</span>) {
+        options = _.<span class="hljs-title function_">extend</span>({ <span class="hljs-attr">parse</span>: <span class="hljs-literal">true</span> }, options);
+        <span class="hljs-keyword">var</span> model = <span class="hljs-variable language_">this</span>;
+        <span class="hljs-keyword">var</span> success = options.<span class="hljs-property">success</span>;
+        options.<span class="hljs-property">success</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) {
+            <span class="hljs-keyword">var</span> serverAttrs = options.<span class="hljs-property">parse</span> ? model.<span class="hljs-title function_">parse</span>(resp, options) : resp;
+            <span class="hljs-keyword">if</span> (!model.<span class="hljs-title function_">set</span>(serverAttrs, options)) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+            <span class="hljs-keyword">if</span> (success) success.<span class="hljs-title function_">call</span>(options.<span class="hljs-property">context</span>, model, resp, options);
+            model.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;fetch&#x27;</span>, model, resp, options);
+            model.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;sync&#x27;</span>, model, resp, options);
+        };
+        <span class="hljs-title function_">wrapError</span>(<span class="hljs-variable language_">this</span>, options, <span class="hljs-string">&#x27;fetch&#x27;</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">sync</span>(<span class="hljs-string">&#x27;read&#x27;</span>, <span class="hljs-variable language_">this</span>, options);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Set a hash of model attributes, and sync the model to the server.
+If the server returns an attributes hash that differs, the model’s
+state will be <code>set</code> again.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">save</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">key, val, options</span>) {</pre></div>
+                                
+                                    
+                
+                    <p>Handle both <code>&quot;key&quot;, value</code> and <code>{key: value}</code> -style arguments.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">var</span> attrs;
+        <span class="hljs-keyword">if</span> (key == <span class="hljs-literal">null</span> || <span class="hljs-keyword">typeof</span> key === <span class="hljs-string">&#x27;object&#x27;</span>) {
+            attrs = key;
+            options = val;
+        } <span class="hljs-keyword">else</span> {
+            (attrs = {})[key] = val;
+        }
+
+        options = _.<span class="hljs-title function_">extend</span>({ <span class="hljs-attr">validate</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">validateForServer</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">parse</span>: <span class="hljs-literal">true</span> }, options);
+        <span class="hljs-keyword">var</span> wait = options.<span class="hljs-property">wait</span>;</pre></div>
+                                
+                                    
+                
+                    <p>If we’re not waiting and attributes exist, save acts as
+<code>set(attr).save(null, opts)</code> with validation. Otherwise, check if
+the model will be valid when the attributes, if any, are set.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (attrs &amp;&amp; !wait) {
+            <span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">set</span>(attrs, options)) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_validate</span>(attrs, options)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        }</pre></div>
+                                
+                                    
+                
+                    <p>After a successful server-side save, the client is (optionally)
+updated with the server-side state.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">var</span> model = <span class="hljs-variable language_">this</span>;
+        <span class="hljs-keyword">var</span> success = options.<span class="hljs-property">success</span>;
+        <span class="hljs-keyword">var</span> attributes = <span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span>;
+        options.<span class="hljs-property">success</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) {</pre></div>
+                                
+                                    
+                
+                    <p>Ensure attributes are restored during synchronous saves.</p>
+
+                        
+                            <div class='highlight'><pre>            model.<span class="hljs-property">attributes</span> = attributes;
+            <span class="hljs-keyword">var</span> serverAttrs = options.<span class="hljs-property">parse</span> ? model.<span class="hljs-title function_">parse</span>(resp, options) : resp;
+            <span class="hljs-keyword">if</span> (wait) serverAttrs = _.<span class="hljs-title function_">extend</span>({}, attrs, serverAttrs);
+            <span class="hljs-keyword">if</span> (serverAttrs &amp;&amp; !model.<span class="hljs-title function_">set</span>(serverAttrs, options)) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+            <span class="hljs-keyword">if</span> (success) success.<span class="hljs-title function_">call</span>(options.<span class="hljs-property">context</span>, model, resp, options);
+            model.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;save&#x27;</span>, model, resp, options);
+            model.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;sync&#x27;</span>, model, resp, options);
+        };
+        <span class="hljs-title function_">wrapError</span>(<span class="hljs-variable language_">this</span>, options, <span class="hljs-string">&#x27;save&#x27;</span>);</pre></div>
+                                
+                                    
+                
+                    <p>Set temporary attributes if <code>{wait: true}</code> to properly find new ids.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (attrs &amp;&amp; wait) <span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span> = _.<span class="hljs-title function_">extend</span>({}, attributes, attrs);
+
+        <span class="hljs-keyword">var</span> method = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">isNew</span>() ? <span class="hljs-string">&#x27;create&#x27;</span> : options.<span class="hljs-property">patch</span> ? <span class="hljs-string">&#x27;patch&#x27;</span> : <span class="hljs-string">&#x27;update&#x27;</span>;
+        <span class="hljs-keyword">if</span> (method === <span class="hljs-string">&#x27;patch&#x27;</span> &amp;&amp; !options.<span class="hljs-property">attrs</span>) options.<span class="hljs-property">attrs</span> = attrs;
+        <span class="hljs-keyword">var</span> xhr = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">sync</span>(method, <span class="hljs-variable language_">this</span>, options);</pre></div>
+                                
+                                    
+                
+                    <p>Restore attributes.</p>
+
+                        
+                            <div class='highlight'><pre>        <span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span> = attributes;
+
+        <span class="hljs-keyword">return</span> xhr;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Destroy this model on the server if it was already persisted.
+Optimistically removes the model from its collection, if it has one.
+If <code>wait: true</code> is passed, waits for the server to respond before removal.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">destroy</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">options</span>) {
+        options = options ? _.<span class="hljs-title function_">clone</span>(options) : {};
+        <span class="hljs-keyword">var</span> model = <span class="hljs-variable language_">this</span>;
+        <span class="hljs-keyword">var</span> success = options.<span class="hljs-property">success</span>;
+        <span class="hljs-keyword">var</span> wait = options.<span class="hljs-property">wait</span>;
+
+        <span class="hljs-keyword">var</span> destroy = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+            model.<span class="hljs-title function_">stopListening</span>();
+            model.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;destroy&#x27;</span>, model, model.<span class="hljs-property">collection</span>, options);
+        };
+
+        options.<span class="hljs-property">success</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) {
+            <span class="hljs-keyword">if</span> (wait) <span class="hljs-title function_">destroy</span>();
+            <span class="hljs-keyword">if</span> (success) success.<span class="hljs-title function_">call</span>(options.<span class="hljs-property">context</span>, model, resp, options);
+            <span class="hljs-keyword">if</span> (!model.<span class="hljs-title function_">isNew</span>()) model.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;sync&#x27;</span>, model, resp, options);
+        };
+
+        <span class="hljs-keyword">var</span> xhr = <span class="hljs-literal">false</span>;
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">isNew</span>()) {
+            _.<span class="hljs-title function_">defer</span>(options.<span class="hljs-property">success</span>);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-title function_">wrapError</span>(<span class="hljs-variable language_">this</span>, options, <span class="hljs-string">&#x27;destroy&#x27;</span>);
+            xhr = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">sync</span>(<span class="hljs-string">&#x27;delete&#x27;</span>, <span class="hljs-variable language_">this</span>, options);
+        }
+        <span class="hljs-keyword">if</span> (!wait) <span class="hljs-title function_">destroy</span>();
+        <span class="hljs-keyword">return</span> xhr;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Default URL for the model’s representation on the server – if you’re
+using timeforce’s restful methods, override this to change the endpoint
+that will be called.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">url</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">var</span> base =
+            _.<span class="hljs-title function_">result</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-string">&#x27;urlRoot&#x27;</span>) ||
+            _.<span class="hljs-title function_">result</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">collection</span>, <span class="hljs-string">&#x27;url&#x27;</span>) ||
+            <span class="hljs-title function_">urlError</span>();
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">isNew</span>()) <span class="hljs-keyword">return</span> base;
+        <span class="hljs-keyword">var</span> id = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">get</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">idAttribute</span>);
+        <span class="hljs-keyword">return</span> base.<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/[^\/]$/</span>, <span class="hljs-string">&#x27;$&amp;/&#x27;</span>) + <span class="hljs-built_in">encodeURIComponent</span>(id);
+    },</pre></div>
+                                
+                                    
+                
+                    <p><strong>parse</strong> converts a response into the hash of attributes to be <code>set</code> on
+the model. The default implementation is just to pass the response along.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">parse</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) {
+        <span class="hljs-keyword">return</span> resp;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Create a new model with identical attributes to this one.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">clone</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">constructor</span>(<span class="hljs-params">_.cloneDeep(<span class="hljs-variable language_">this</span>.attributes)</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>A model is new if it has never been saved to the server, and lacks an id.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">isNew</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> !<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">has</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">idAttribute</span>);
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Check if the model is currently in a valid state.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">isValid</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">options</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_validate</span>({}, _.<span class="hljs-title function_">extend</span>({}, options, { <span class="hljs-attr">validate</span>: <span class="hljs-literal">true</span> }));
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Run validation against the next complete set of model attributes,
+returning <code>true</code> if all is well. Otherwise, fire an <code>&quot;invalid&quot;</code> event.</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">_validate</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">attrs, options</span>) {
+        <span class="hljs-keyword">if</span> (!options.<span class="hljs-property">validate</span> || !<span class="hljs-variable language_">this</span>.<span class="hljs-property">validate</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        attrs = _.<span class="hljs-title function_">extend</span>({}, <span class="hljs-variable language_">this</span>.<span class="hljs-property">attributes</span>, attrs);
+        <span class="hljs-keyword">var</span> error = <span class="hljs-variable language_">this</span>.<span class="hljs-property">validationError</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">validate</span>(attrs, options) || <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">if</span> (!error) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">trigger</span>(<span class="hljs-string">&#x27;invalid&#x27;</span>, <span class="hljs-variable language_">this</span>, error, _.<span class="hljs-title function_">extend</span>(options, { <span class="hljs-attr">validationError</span>: error }));
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Help to discover if a random object if a Model</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">isModel</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_global</span>.<span class="hljs-property">Model</span>;
+    },</pre></div>
+                                
+                                    
+                
+                    <p>Help to discover if a random object if a Collection</p>
+
+                        
+                            <div class='highlight'><pre>    <span class="hljs-attr">isCollection</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">_global</span>.<span class="hljs-property">Collection</span>;
+    },
+});
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title class_">Model</span>;</pre></div>
+                                
+                                    
+                                        <div class="fleur">h</div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,76 @@
+html {
+  color: black;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.light) {
+    color: white;
+  }
+  html:not(.light) pre .hljs-keyword, html:not(.light) pre .hljs-assignment, html:not(.light) pre .hljs-literal, html:not(.light) pre .hljs-css .hljs-rule .hljs-keyword, html:not(.light) pre .hljs-winutils, html:not(.light) pre .hljs-javascript .hljs-title, html:not(.light) pre .hljs-lisp .hljs-title, html:not(.light) pre .hljs-subst {
+    color: orange;
+  }
+  html:not(.light) body,
+html:not(.light) .container,
+html:not(.light) .page,
+html:not(.light) pre {
+    background: none;
+    background-color: #222 !important;
+  }
+  html:not(.light) pre {
+    border: 2px solid #CCC;
+  }
+  html:not(.light) pre .hljs-params {
+    color: deepskyblue;
+  }
+  html:not(.light) h1,
+html:not(.light) h2,
+html:not(.light) h3,
+html:not(.light) h4,
+html:not(.light) h5,
+html:not(.light) h6,
+html:not(.light) p,
+html:not(.light) code,
+html:not(.light) pre,
+html:not(.light) a, html:not(.light) a:active, html:not(.light) a:hover, html:not(.light) a:visited {
+    color: white !important;
+  }
+  html:not(.light) small.color-modes a:link, html:not(.light) small.color-modes a:active, html:not(.light) small.color-modes a:visited {
+    border-color: white;
+  }
+}
+html.dark {
+  color: white;
+}
+html.dark pre .hljs-keyword, html.dark pre .hljs-assignment, html.dark pre .hljs-literal, html.dark pre .hljs-css .hljs-rule .hljs-keyword, html.dark pre .hljs-winutils, html.dark pre .hljs-javascript .hljs-title, html.dark pre .hljs-lisp .hljs-title, html.dark pre .hljs-subst {
+  color: orange;
+}
+html.dark body,
+html.dark .container,
+html.dark .page,
+html.dark pre {
+  background: none;
+  background-color: #222 !important;
+}
+html.dark pre {
+  border: 2px solid #CCC;
+}
+html.dark pre .hljs-params {
+  color: deepskyblue;
+}
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+html.dark p,
+html.dark code,
+html.dark pre,
+html.dark a, html.dark a:active, html.dark a:hover, html.dark a:visited {
+  color: white !important;
+}
+html.dark small.color-modes a:link, html.dark small.color-modes a:active, html.dark small.color-modes a:visited {
+  border-color: white;
+}
+
+/*# sourceMappingURL=color-modes.css.map */
